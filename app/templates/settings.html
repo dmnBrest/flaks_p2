@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% block content %}
+	<div class="container with-padding account-settings">
+		<div class="row">
+			<div class="col-xs-12">
+
+				<h1>Settings</h1>
+
+				{% from "_m.html" import form_field %}
+				<form action="" method="POST" id="settings-form" novalidate enctype="multipart/form-data">
+
+					{{ form.hidden_tag() }}
+
+					<div class="avatar-select box">
+						<h2>Avatar</h2>
+						<table>
+							<tr>
+								<td><input type="radio" name="avatar_type" id="avatar_type_gravatar" value="gravatar" {{ 'checked' if form.avatar_type.data == 'gravatar' }}></td>
+								<td><img src="{{ user.get_gravatar_link(48) }}" alt="user Gravatar" /></td>
+								<td><a href="http://gravatar.com/" target="_blank">Gravatar.com</a></td>
+								<td>(by email "{{ user.email }}")</td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><input type="radio" name="avatar_type" id="avatar_type_avatar" value="avatar" {{ 'checked' if form.avatar_type.data == 'avatar' }} ></td>
+								<td><img src="{{ user.get_internal_avatar_link(48) }}?r={{ rnd }}" alt="Internal Avatar"/></td>
+								<td>Internal Avatar</td>
+								<td>
+									{{ form.avatar_file }}
+								</td>
+								<td>
+									<div>
+										{% for error in form.avatar_file.errors %}
+											<div style="font-size: 12px; color:#FF0000;">
+												{{ error }}
+											</div>
+										{% endfor %}
+									</div>
+								</td>
+							</tr>
+						</table>
+					</div>
+
+					<div class="avatar-select box">
+						<h2>Account</h2>
+						{{ form_field(form.username, with_label=True) }}
+						{{ form_field(form.email, with_label=True) }}
+						{{ form_field(form.timezone, with_label=True) }}
+					</div>
+
+					<div class="avatar-select box">
+						<div>
+							<h2 style="display: inline-block;">Password</h2>&nbsp;&nbsp;<span>Leave this section blank if you don't want to change password.</span>
+						</div>
+						{{ form_field(form.old_password, with_label=True) }}
+						{{ form_field(form.new_password, with_label=True) }}
+					</div>
+
+					<br/>
+					<br/>
+					<input class=" btn btn-primary" id="submit" name="submit" type="submit" value="Save">
+					&nbsp;&nbsp;
+					<a href="{{ url_for('user_view', slug=user.slug) }}" class="btn btn-default" >Back to Profile</a>
+
+				</form>
+			</div>
+		</div>
+	</div>
+
+{% endblock %}

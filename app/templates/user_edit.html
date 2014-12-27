@@ -1,0 +1,186 @@
+{% extends "layout.html" %}
+{% block content %}
+	<script src="/static/datepicker/bootstrap-datepicker.js"></script>
+	<link href="/static/datepicker/datepicker3.css" rel="stylesheet">
+
+	<script src="/static/jquery.color-2.1.2.min.js"></script>
+
+	<script src="//maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
+
+	<style>
+		#map {
+			margin-bottom: 20px;
+			position: relative;
+		}
+		div#crosshair {
+			position: absolute;
+			top: 192px;
+			height: 19px;
+			width: 19px;
+			left: 50%;
+			margin-left: -8px;
+			display: block;
+			background: url("/static/crosshair.gif");
+			background-position: center center;
+			background-repeat: no-repeat;
+		}
+		#map img {
+			max-width: none;
+		}
+	</style>
+
+
+
+	<script>
+		jQuery(function(){
+			jQuery('#user-form #type').change(function(){
+				init_sections();
+			});
+			init_sections();
+
+			jQuery('#user-form #birthdate').datepicker({});
+
+			var map = new google.maps.Map(document.getElementById('map_canvas'), {
+				zoom: 10,
+				center: new google.maps.LatLng({{ form.geo_lat.data or 37.7749300 }}, {{ form.geo_lng.data or -122.4194200 }}),
+				mapTypeId: google.maps.MapTypeId.ROADMAP
+			});
+			google.maps.event.addListener(map, 'dragend', function() {
+				$center_coordinates = map.getCenter();
+				getAdressByLatLng($center_coordinates.lat(), $center_coordinates.lng());
+			} );
+
+			function getAdressByLatLng(lat, lng) {
+				$.ajax({ url:'https://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+lng+'&sensor=false',
+					success: function(data){
+						var arrAddress = data.results[0].address_components;
+						var address = [];
+						for (i = 0; i < arrAddress.length; i++) {
+							var component = arrAddress[i];
+							if (component.types.indexOf("locality") > -1){
+								address['locality'] = component.long_name;
+							}  else if (component.types.indexOf("country") > -1) {
+								address['country'] = component.long_name;
+								address['countryCode'] = component.short_name;
+							}
+						}
+						$('#geo_lat').val(lat);
+						$('#geo_lng').val(lng);
+						$('#geo_address').val((address['locality'] != undefined ? address['locality']+', ' : '')+(address['country']));
+						$('#geo_lat, #geo_lng, #geo_address').stop().css('background-color', '#f6ff00').animate({backgroundColor: '#fff'}, 1000);
+					}
+				});
+			}
+
+		});
+		function init_sections() {
+			jQuery('.section').addClass('hidden');
+			var user_type = jQuery('form#user-form #type').val();
+			console.log(user_type);
+			jQuery('.'+user_type+'-section').removeClass('hidden');
+		}
+
+	</script>
+	<div class="container with-padding user-edit">
+		<div class="row">
+			<div class="col-xs-12">
+				<div>
+					<h1 style="display: inline-block;">Edit My Profile</h1>
+				</div>
+				<div>
+					<a href="{{ url_for('user_view', slug=user.slug) }}" >&lt; Back to User</a>
+				</div>
+				<br/>
+
+				<div class="row">
+					<div class="col-md-3">
+						<img src="{{ user.get_avatar(200) }}" alt=""/>
+						<br/><br/>
+						<p style="color: #737373; font-size: 12px;">You can change avatar in <a href="{{ url_for('account_settings') }}">settings</a></p>
+					</div>
+					<div class="col-md-9">
+						{% from "_m.html" import form_field %}
+						<form action="" method="POST" id="user-form" novalidate>
+							{{ form.hidden_tag() }}
+
+							{{ form_field(form.type, with_label=True) }}
+
+							<div class="section developer-section other-section">
+								<div class="box">
+									<h2>Personal Information</h2>
+									{{ form_field(form.first_name, with_label=True) }}
+									{{ form_field(form.last_name, with_label=True) }}
+									{{ form_field(form.birthdate, with_label=True) }}
+								</div>
+							</div>
+
+							<div class="section company-section">
+								<div class="box">
+									<h2>Company information</h2>
+									{{ form_field(form.company_name, with_label=True) }}
+									{{ form_field(form.company_info, with_label=True, rows=10) }}
+								</div>
+							</div>
+
+							<div class="section other-section">
+								<div class="box">
+									<h2>About myself</h2>
+									{{ form_field(form.about_myself, rows=10) }}
+								</div>
+							</div>
+
+							<div class="box">
+								<h2>Geolocation</h2>
+
+								<div style="margin: 20px 0; color: #00B4DC;">
+									<span style="font-size: 21px;" class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
+									&nbsp;
+									Please center the map on your location. It fills in form automatically.
+								</div>
+								<div id="map" style="">
+									<div id="map_canvas" style="width:100%; height:400px"></div>
+									<div id="crosshair"></div>
+								</div>
+
+								{{ form_field(form.geo_lat, with_label=True) }}
+								{{ form_field(form.geo_lng, with_label=True) }}
+								{{ form_field(form.geo_address, with_label=True) }}
+							</div>
+
+							<div class="section developer-section">
+								<div class="box">
+									<h2>Professional information</h2>
+									{{ form_field(form.sfdc_start, with_label=True) }}
+									{{ form_field(form.sfdc_skills, with_label=True, rows=10) }}
+									{{ form_field(form.sfdc_certificates, with_label=True, rows=5) }}
+									{{ form_field(form.other_skills, with_label=True, rows=5) }}
+								</div>
+							</div>
+
+							<div class="section developer-section company-section">
+								<div class="box">
+									<h2>Links</h2>
+									{{ form_field(form.google_plus, with_label=True) }}
+									{{ form_field(form.linkedin, with_label=True) }}
+									{{ form_field(form.facebook, with_label=True) }}
+									{{ form_field(form.personal_site, with_label=True) }}
+								</div>
+							</div>
+
+							<br/>
+							<br/>
+							<input class=" btn btn-primary" id="submit" name="submit" type="submit" value="Save">
+							&nbsp;&nbsp;
+							<a href="{{ url_for('user_view', slug=user.slug) }}" class="btn btn-default" >Cancel</a>
+
+						</form>
+
+					</div>
+				</div>
+
+
+
+			</div>
+		</div>
+	</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block content %}
+	<div class="container with-padding article-view">
+		<div class="row">
+			<div class="col-xs-12">
+
+				<article>
+					<div class="row">
+						<div class="col-md-8">
+							<h1>{{ post.title }}</h1>
+							<div class="article-info">
+								<span>{{ post.user.username }}</span>, <span>{{ post.published_at }}</span>
+							</div>
+						</div>
+						<div class="col-md-4">
+							<div class="article-actions md-right">
+								{% if post.user_id == current_user.id and current_user.has_role('editor') %}
+									<a href="{{ url_for('blog_edit_post', slug=post.slug) }}" class="btn btn-default btn-sm">Edit</a>
+								{% endif %}
+							</div>
+						</div>
+					</div>
+					<div class="article-thumbnail">
+						{% if post.thumbnail != None %}
+							<img src="{{ post.thumbnail }}" alt=""/>
+						{% endif %}
+					</div>
+					<div class="article-preview">
+						{{ post.preview_html | safe }}
+					</div>
+					<div class="article-body">
+						{% if post.body_html != None %}
+							{{ post.body_html | safe }}
+						{% endif %}
+					</div>
+				</article>
+
+			</div>
+		</div>
+	</div>
+{% endblock %}

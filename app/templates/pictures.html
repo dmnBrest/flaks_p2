@@ -1,0 +1,148 @@
+{% extends pic_layout %}
+{% block content %}
+
+<!-- blueimp Gallery styles -->
+<link rel="stylesheet" href="//blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<link rel="stylesheet" href="/static/fupload/css/jquery.fileupload.css">
+<link rel="stylesheet" href="/static/fupload/css/jquery.fileupload-ui.css">
+<!-- CSS adjustments for browsers with JavaScript disabled -->
+<noscript><link rel="stylesheet" href="/static/fupload/css/jquery.fileupload-noscript.css"></noscript>
+<noscript><link rel="stylesheet" href="/static/fupload/css/jquery.fileupload-ui-noscript.css"></noscript>
+
+<script>
+	jQuery(function(){
+		initPictures();
+	});
+
+	function initPictures(){
+		if (window.opener != null) { // && window.opener.location.pathname == '/editor'
+			jQuery('.c-insert-pic').removeClass('hidden');
+		}
+	}
+
+	function insertTo(filename) {
+		window.opener.InsertPicture(filename, '{{ type }}');
+		window.close();
+	}
+
+</script>
+
+<div class="container">
+	<div class="row">
+		<div class="col-xs-12">
+			<h1>Your pictures</h1>
+
+			<div class="pics-gallery">
+				{% for pic in pics %}
+					<div class="img-wrapper">
+						<img src="{{ pic.thumb_path(256) }}" alt=""/><br/>
+						<a href="javascript:void(0);" onclick="window.prompt('Copy to clipboard: Ctrl+C, Enter', '{{ pic.picture_path() }}');">copy</a>
+						&nbsp;&nbsp;
+						<a href="javascript:void(0);" class="c-insert-pic hidden" onclick="insertTo('{{ pic.filename }}');">insert</a>
+					</div>
+				{% endfor %}
+			</div>
+
+			<!-- The fileinput-button span is used to style the file input field as button -->
+			<span class="btn btn-success fileinput-button">
+				<i class="glyphicon glyphicon-plus"></i>
+				<span>Select files...</span>
+				<!-- The file input field used as target for the file upload widget -->
+				<input id="fileupload" type="file" name="file" multiple>
+			</span>
+			<br>
+			<br>
+			<!-- The global progress bar -->
+			<div id="progress" class="progress">
+				<div class="progress-bar progress-bar-success"></div>
+			</div>
+			<!-- The container for the uploaded files -->
+			<div id="files" class="files"></div>
+			<br>
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h3 class="panel-title">Demo Notes</h3>
+				</div>
+				<div class="panel-body">
+					<ul>
+						<li>The maximum file size for uploads in this demo is <strong>2 MB</strong> (default file size is unlimited).</li>
+						<li>Only image files (<strong>JPG, GIF, PNG</strong>) are allowed.</li>
+						<li>You can <strong>drag &amp; drop</strong> files from your desktop on this webpage (see <a href="https://github.com/blueimp/jQuery-File-Upload/wiki/Browser-support">Browser support</a>).</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+		<script src="/static/fupload/js/vendor/jquery.ui.widget.js"></script>
+		<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+		<script src="/static/fupload/js/jquery.iframe-transport.js"></script>
+		<!-- The basic File Upload plugin -->
+		<script src="/static/fupload/js/jquery.fileupload.js"></script>
+
+		<script>
+		/*jslint unparam: true */
+		/*global window, $ */
+		$(function () {
+			'use strict';
+			// Change this to the location of your server-side upload handler:
+			var url = '/pictures';
+			$('#fileupload').fileupload({
+				url: url,
+				dataType: 'json',
+				add: function(e, data) {
+
+					console.log(data);
+
+					var uploadErrors = [];
+					var acceptFileTypes = /^image\/(gif|jpe?g|png)$/i;
+					if(data.originalFiles[0]['type'].length && !acceptFileTypes.test(data.originalFiles[0]['type'])) {
+						uploadErrors.push('Not an accepted file type');
+					}
+					if(data.originalFiles[0]['size'] > 2000000) {
+						uploadErrors.push('Filesize is too big');
+					}
+					if(uploadErrors.length > 0) {
+						alert(uploadErrors.join("\n"));
+					} else {
+						data.submit();
+					}
+				},
+				done: function (e, data) {
+					jQuery.each(data.result.files, function (index, file) {
+						if (file.error) {
+							alert(file.error);
+							return;
+						}
+						var pic_tpl = jQuery('#pic_tpl').html();
+						pic_tpl = pic_tpl.replace('%x1%', file.url);
+						pic_tpl = pic_tpl.replace('%x2%', file.thumbnailUrl);
+						pic_tpl = pic_tpl.replace('%x3%', file.name);
+						jQuery('.pics-gallery').append(jQuery(pic_tpl));
+						initPictures();
+					});
+				},
+				progressall: function (e, data) {
+					var progress = parseInt(data.loaded / data.total * 100, 10);
+					$('#progress .progress-bar').css(
+						'width',
+						progress + '%'
+					);
+				}
+			}).prop('disabled', !$.support.fileInput)
+				.parent().addClass($.support.fileInput ? undefined : 'disabled');
+		});
+		</script>
+
+	<script id="pic_tpl" type="text/template">
+<div class="img-wrapper">
+	<img src="%x2%" alt=""/><br/>
+	<a href="javascript:void(0);" onclick="window.prompt('Copy to clipboard: Ctrl+C, Enter', '%x1%');">copy</a>
+	&nbsp;&nbsp;
+	<a href="javascript:void(0);" class="c-insert-pic hidden" onclick="insertTo('%x3%');">insert</a>
+</div>
+	</script>
+
+	</div>
+</div>
+{% endblock %}

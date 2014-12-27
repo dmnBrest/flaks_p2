@@ -1,0 +1,154 @@
+{% extends "layout.html" %}
+{% block content %}
+
+	<script type="text/javascript" src="/static/markitup/jquery.markitup.js"></script>
+	<link rel="stylesheet" type="text/css" href="/static/markitup/skins/simple/style.css" />
+	<link rel="stylesheet" type="text/css" href="/static/markitup/sets/bbcode/style.css" />
+	<script type="text/javascript" >
+		mySettings = {
+			previewParserPath:	'/blog/bb/preview', // path to your BBCode parser
+			onShiftEnter:	{keepDefault:false, replaceWith:'[br /]\n'},
+			onCtrlEnter:	{keepDefault:false, openWith:'\n[p]', closeWith:'[/p]\n'},
+			onTab:			{keepDefault:false, openWith:'	'},
+			markupSet: [
+				{name:'Heading 2', key:'2', openWith:'[h2(!( class="[![Class]!]")!)]', closeWith:'[/h2]', placeHolder:'Your title here...' },
+				{name:'Heading 3', key:'3', openWith:'[h3(!( class="[![Class]!]")!)]', closeWith:'[/h3]', placeHolder:'Your title here...' },
+				{name:'Heading 4', key:'4', openWith:'[h4(!( class="[![Class]!]")!)]', closeWith:'[/h4]', placeHolder:'Your title here...' },
+				{name:'Paragraph', openWith:'[p(!( class="[![Class]!]")!)]', closeWith:'[/p]' },
+				{name:'Bold', key:'B', openWith:'[b]', closeWith:'[/b]'},
+				{name:'Italic', key:'I', openWith:'[i]', closeWith:'[/i]'},
+				{name:'Underline', key:'U', openWith:'[u]', closeWith:'[/u]'},
+				{separator:'---------------' },
+				{name:'Picture', key:'P', replaceWith:'[img][![Url]!][/img]'},
+				{name:'Link', key:'L', openWith:'[url=[![Url]!]]', closeWith:'[/url]', placeHolder:'Your text to link here...'},
+				{separator:'---------------' },
+				{name:'Size', key:'S', openWith:'[size=[![Text size]!]]', closeWith:'[/size]',
+				dropMenu :[
+					{name:'Big', openWith:'[size=200]', closeWith:'[/size]' },
+					{name:'Normal', openWith:'[size=100]', closeWith:'[/size]' },
+					{name:'Small', openWith:'[size=50]', closeWith:'[/size]' }
+				]},
+				{separator:'---------------' },
+				{name:'Bulleted list', openWith:'[list]\n', closeWith:'\n[/list]'},
+				{name:'Numeric list', openWith:'[list=[![Starting number]!]]\n', closeWith:'\n[/list]'},
+				{name:'List item', openWith:'[*] '},
+				{separator:'---------------' },
+				{name:'Quotes', openWith:'[quote]', closeWith:'[/quote]'},
+				{name:'Code', openWith:'[code]', closeWith:'[/code]'},
+				{separator:'---------------' },
+				{name:'Clean', className:"clean", replaceWith:function(markitup) { return markitup.selection.replace(/\[(.*?)\]/g, "") } },
+				{name:'Preview', className:"preview", call:'preview' }
+			]
+		};
+
+		jQuery(document).ready(function() {
+			jQuery(".markItUpMe").markItUp(mySettings);
+
+			jQuery(".emoticons a").click(function() {
+				emoticon = $(this).attr("title");
+				jQuery.markItUp( { replaceWith:emoticon } );
+			});
+		});
+
+		function InsertPicture(pic, type) {
+			if (type == 'editor') {
+				img_tag = '[img]/pictures/' + pic + '[/img]';
+				jQuery.markItUp({replaceWith: img_tag});
+			} else if (type == 'thumbnail') {
+				pic_url = '/pictures/'+pic;
+				jQuery('#thumbnail').val(pic_url);
+				jQuery('img.thumbnail-preview').attr('src', pic_url);
+			}
+		}
+
+		function clearThumbnail() {
+			jQuery('#thumbnail').val('');
+			jQuery('img.thumbnail-preview').attr('src', '/static/no-image.jpg');
+		}
+
+	</script>
+
+	<div class="container with-padding article-edit">
+		<div class="row">
+			<div class="col-xs-12">
+				<h1>Editor</h1>
+				<br/>
+				<div>
+					<a href="/{{ post.slug }}" >&lt; Back to Article</a>
+				</div>
+				<br/>
+				{% from "_m.html" import form_field %}
+				<form action="" method="POST" novalidate>
+					{{ form.hidden_tag() }}
+					{{ form_field(form.title, with_label=True) }}
+					{% if post %}
+						<div><i>Slug: {{ post.slug }}</i></div>
+						<br/>
+					{% endif %}
+					<div class="emoticons">
+						<a href="#" title=":p"><img src="/static/markitup/images/emoticon-happy.png" /></a>
+						<a href="#" title=":("><img src="/static/markitup/images/emoticon-unhappy.png" /></a>
+						<a href="#" title=":o"><img src="/static/markitup/images/emoticon-surprised.png" /></a>
+						<a href="#" title=":p"><img src="/static/markitup/images/emoticon-tongue.png" /></a>
+						<a href="#" title=";)"><img src="/static/markitup/images/emoticon-wink.png" /></a>
+						<a href="#" title=":D"><img src="/static/markitup/images/emoticon-smile.png" /></a>
+						&nbsp;&nbsp;
+						<a href="javascript:void(0);" class="btn btn-default btn-xs" onclick="picsGalleryPopup('editor');">
+							<span class="glyphicon glyphicon-picture" aria-hidden="true"></span>&nbsp;&nbsp;Gallery
+						</a>
+					</div>
+					{{ form_field(form.body, class='markItUpMe') }}
+ 					<div class="form-group ">
+						<label for="meta_keywords">
+							Thumbnail:
+						</label>
+						<div class="row">
+							<div class="col-md-2">
+								{% if form.thumbnail.data != None and form.thumbnail.data != '' %}
+									<img class="thumbnail-preview" src="{{ form.thumbnail.data }}" alt="post thumbnail" style="width: 128px; border: 4px solid #f0f0f0;" />
+								{% else %}
+									<img class="thumbnail-preview" src="/static/no-image.jpg" alt="post thumbnail" style="width: 128px; border: 4px solid#f0f0f0;" />
+								{% endif %}
+							</div>
+							<div class="col-md-10">
+								<div class="hidden">
+									{{ form_field(form.thumbnail) }}
+								</div>
+								<a href="javascript:void(0);" class="btn btn-default btn-sm" onclick="picsGalleryPopup('thumbnail');">
+									<span class="glyphicon glyphicon-picture" aria-hidden="true"></span>&nbsp;&nbsp;Gallery
+								</a>
+								&nbsp;&nbsp;
+								<a href="javascript:void(0);" class="btn btn-default btn-sm" onclick="clearThumbnail();">
+									Clear
+								</a>
+							</div>
+						</div>
+					</div>
+					<br />
+					{{ form_field(form.meta_keywords, with_label=True) }}
+					{{ form_field(form.meta_description, with_label=True) }}
+					<br/>
+					{% if post != None %}
+						<div class="row">
+							<div class="col-md-2">
+								{{ form_field(form.published) }}
+							</div>
+							<div class="col-md-10">
+								{% if form.published.data == True %}
+									&nbsp;&nbsp;&nbsp;&nbsp;<span><i>Published at: {{ post.published_at }}</i></span>
+								{% endif %}
+							</div>
+						</div>
+					{% endif %}
+					<br/>
+					<input class=" btn btn-primary" id="submit" name="submit" type="submit" value="Save">
+					&nbsp;&nbsp;
+					<input class=" btn btn-primary" id="submit" name="submit" type="submit" value="Save & Exit">
+					&nbsp;&nbsp;
+					<a href="/{{ post.slug }}" class="btn btn-default" >Back to Article</a>
+				</form>
+			</div>
+		</div>
+	</div>
+
+{% endblock %}

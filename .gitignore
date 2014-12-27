@@ -1,0 +1,7 @@
+pictures/*
+appx.log
+GeoLiteCity.dat
+migrations/versions/*
+config.py
+.idea
+

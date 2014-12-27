@@ -1,0 +1,389 @@
+# -*- coding: utf-8 -*-
+
+from app import app, db, bbcode_parser
+from flask import request, render_template, redirect, url_for, send_from_directory, abort, flash
+import datetime
+import os
+from PIL import Image
+import simplejson
+import traceback
+from werkzeug.utils import secure_filename
+import imghdr
+from models import User, Role, Picture, Post, Meta
+from forms import BlogPostForm, UserForm, SettingsForm
+from flask.ext.security import login_required, roles_required, current_user
+from flask.ext.security.utils import verify_password, encrypt_password
+from unidecode import unidecode
+from sqlalchemy.orm import joinedload
+import random
+
+@app.route('/')
+#@login_required
+def home():
+	#request.form['username']
+	#flash('DOOM FLASH!!!!', 'info')
+	#flash('DOOM FLASH!!!!', 'error')
+	#flash('DOOM FLASH!!!!', 'success')
+
+	# msg = Message("Hello", sender="from@example.com", recipients=["to@example.com"])
+	# msg.body = "testing"
+	# msg.html = "<b>testing</b>"
+	# mail.send(msg)
+
+	# p1 = Picture.query.first()
+	# db.session.delete(p1)
+	# db.session.commit()
+	# app.logger.debug('p1 deleted')
+
+	u1 = User.query.first()
+	u1.first_name = 'f1'
+	u1.last_name = 'l1'
+	u1.current_login_ip = '37.212.40.101'
+	u1.slug = None
+	db.session.commit()
+
+	name = 'DMN'
+	return render_template('home.html', name=name)
+
+
+
+# ------------- PICTURES ------------------
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
+IGNORED_FILES = set(['.gitignore'])
+
+@app.route('/pictures', methods=['GET', 'POST'])
+@roles_required('editor')
+def pictures():
+	if request.method == 'POST':
+		file = request.files['file']
+
+		if file:
+			filename = secure_filename(unidecode(file.filename))
+			filename = str(current_user.id+1024)+'_'+filename
+			filename = gen_file_name(filename)
+			mimetype = file.content_type
+
+			file_ext = imghdr.what(file)
+
+			app.logger.debug(file_ext)
+
+			if not file_ext in ALLOWED_EXTENSIONS:
+				result = {"error": "Filetype not allowed",
+						  "name": filename,
+						  "type": mimetype,
+						  "size": 0,}
+
+			else:
+				# save file to disk
+				uploaded_file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+				file.save(uploaded_file_path)
+
+				p = Picture(filename=filename, user=current_user)
+				db.session.add(p)
+
+				# create thumbnail after saving
+				if mimetype.startswith('image'):
+					create_thumbnail(filename, 256)
+
+				# get file size after saving
+				size = os.path.getsize(uploaded_file_path)
+
+				# return json for js call back
+				result = {"name": p.filename,
+						 "url": p.picture_path(),
+						 "thumbnailUrl": p.thumb_path(256),
+						 }
+
+				db.session.commit()
+
+			return simplejson.dumps({"files": [result]})
+
+	if request.method == 'GET':
+		pics = Picture.query.filter_by(user_id=current_user.id).all()
+		inline = request.args.get('inline', 'false')
+		type = request.args.get('type', '')
+		if inline == 'true':
+			pic_layout='layout_empty.html'
+		else:
+			pic_layout='layout.html'
+		return render_template('pictures.html', pics=pics, pic_layout=pic_layout, type=type)
+
+	return redirect(url_for('home'))
+
+def allowed_file(filename):
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def gen_file_name(filename):
+	i = 1
+	while os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
+		name, extension = os.path.splitext(filename)
+		filename = '%s_%s%s' % (name, str(i), extension)
+		i = i + 1
+	return filename
+
+def create_thumbnail(image, basewidth):
+	try:
+		size = (basewidth, basewidth)
+		img = Image.open(os.path.join(app.config['UPLOAD_FOLDER'], image))
+		# wpercent = (basewidth/float(img.size[0]))
+		# hsize = int((float(img.size[1])*float(wpercent)))
+		# img = img.resize((basewidth,hsize), PIL.Image.ANTIALIAS)
+
+		width, height = img.size
+		if width > height:
+			delta = width - height
+			left = int(delta/2)
+			upper = 0
+			right = height + left
+			lower = height
+		else:
+			delta = height - width
+			left = 0
+			upper = int(delta/2)
+			right = width
+			lower = width + upper
+
+		img = img.crop((left, upper, right, lower))
+
+		img.thumbnail(size, Image.ANTIALIAS)
+		img.save(os.path.join(app.config['THUMBNAIL_FOLDER'], 'thumb'+str(basewidth)+'_'+image), quality=90, dpi=(72,72))
+
+		return True
+
+	except:
+		print traceback.format_exc()
+		return False
+
+# -------------- GET PICTURE for DEV SERVER ----------
+@app.route("/pictures/<string:filename>", methods=['GET'])
+def get_picture(filename):
+	return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER']), filename=secure_filename(filename))
+
+@app.route("/pictures/thumbs/<string:filename>", methods=['GET'])
+def get_thumbnail(filename):
+	return send_from_directory(os.path.join(app.config['THUMBNAIL_FOLDER']), filename=secure_filename(filename))
+
+@app.route("/pictures/avatars/<string:filename>", methods=['GET'])
+def get_avatars(filename):
+	return send_from_directory(os.path.join(app.config['AVATAR_FOLDER']), filename=secure_filename(filename))
+
+# ------------- EDITOR -------------------------------
+@app.route("/blog/")
+def blog_list():
+	posts = Post.query.options(joinedload('user')).filter(Post.published_at != None).order_by(Post.published_at.desc())
+	meta = Meta(title='Blog | Salesforce-Developer.NET',
+				description='Blog for Salesforce Developers with main technical information and examples of apex code.',
+				keywords='salesforce blog, apex blog, visualforce blog'
+				)
+
+	return render_template('blog_list.html', posts=posts, meta=meta)
+
+
+@app.route("/blog/new", methods=['GET', 'POST'])
+@roles_required('editor')
+def blog_new_post():
+	if request.method == 'POST':
+		form = BlogPostForm(request.form)
+		if form.validate():
+			post = Post()
+			post.title = form.title.data
+			post.body = form.body.data
+			post.meta_keywords = form.meta_keywords.data
+			post.meta_description = form.meta_description.data
+			post.thumbnail = form.thumbnail.data
+			post.user_id = current_user.id
+			db.session.add(post)
+			db.session.commit()
+			flash('Post created successfully. You can continue editing or return to Article List.', 'success')
+			return redirect(url_for('blog_edit_post', slug=post.slug))
+		else:
+			flash('There are errors on the form. Please fix them before continuing.', 'error')
+	else:
+		form = BlogPostForm()
+	return render_template('blog_edit.html', form=form, post=None)
+
+@app.route("/blog/bb/preview", methods=['POST'])
+@roles_required('editor')
+def blog_preview_post():
+	body = request.form['data']
+	return render_template('blog_bb_preview.html', body=bbcode_parser.format(body))
+
+@app.route("/blog/<string:slug>/edit/", methods=['GET', 'POST'])
+@roles_required('editor')
+def blog_edit_post(slug):
+	post = Post.query.filter_by(slug=slug).first_or_404()
+	if post.user_id != current_user.id:
+		abort(403)
+	if request.method == 'POST':
+		form = BlogPostForm(request.form)
+		if form.validate():
+			post.title = form.title.data
+			post.body = form.body.data
+			post.meta_keywords = form.meta_keywords.data
+			post.meta_description = form.meta_description.data
+			post.thumbnail = form.thumbnail.data
+			if form.published.data == True and post.published_at == None:
+				post.published_at = datetime.datetime.now()
+			if form.published.data == False and post.published_at != None:
+				post.published_at = None
+			db.session.commit()
+			flash('Post updated successfully. You can continue editing or return to Article List.', 'success')
+			if request.form['submit'] == 'Save & Exit':
+				return redirect(url_for('blog_post', slug=post.slug))
+			return redirect(url_for('blog_edit_post', slug=post.slug))
+		else:
+			flash('There are errors on the form. Please fix them before continuing.', 'error')
+	else:
+		form = BlogPostForm(obj=post)
+		if post.published_at != None:
+			form.published.data = True
+	return render_template('blog_edit.html', form=form, post=post)
+
+
+# ------------ USER --------------------
+@app.route("/user/<string:slug>")
+def user_view(slug):
+	user = User.query.filter_by(slug=slug).first_or_404()
+	return render_template('user_view.html', user=user)
+
+
+@app.route("/user/<string:slug>/edit", methods=['GET', 'POST'])
+@login_required
+def user_edit(slug):
+	user = User.query.filter_by(slug=slug).first_or_404()
+	if user.id != current_user.id:
+		abort(403)
+	if request.method == 'POST':
+		form = UserForm(request.form)
+		if form.validate():
+			user.type = form.type.data
+			user.geo_lat		= form.geo_lat.data
+			user.geo_lng		= form.geo_lng.data
+			user.geo_address	= form.geo_address.data
+			if user.type == 'developer':
+				if user.first_name != form.first_name.data or user.last_name != form.last_name.data:
+					app.logger.debug('reset slug')
+					user.slug = None
+				user.first_name		= form.first_name.data
+				user.last_name 		= form.last_name.data
+				user.birthdate		= form.birthdate.data
+				user.sfdc_start		= form.sfdc_start.data
+				user.sfdc_skills	= form.sfdc_skills.data
+				user.sfdc_certificates = form.sfdc_certificates.data
+				user.other_skills	= form.other_skills.data
+				user.google_plus	= form.google_plus.data
+				user.linkedin		= form.linkedin.data
+				user.facebook		= form.facebook.data
+				user.personal_site	= form.personal_site.data
+			elif user.type == 'company':
+				user.company_name	= form.company_name.data
+				if user.company_name != form.company_name.data:
+					user.slug = None
+				user.company_info	= form.company_info.data
+				user.google_plus	= form.google_plus.data
+				user.linkedin		= form.linkedin.data
+				user.facebook		= form.facebook.data
+				user.personal_site	= form.personal_site.data
+			elif user.type == 'other':
+				user.first_name		= form.first_name.data
+				user.last_name 		= form.last_name.data
+				user.birthdate		= form.birthdate.data
+				user.about_myself	= form.about_myself.data
+			db.session.commit()
+			flash('Profile updated successfully', 'success')
+			return redirect(url_for('user_view', slug=user.slug))
+		else:
+			flash('There are errors on the form. Please fix them before continuing.', 'error')
+	else:
+		form = UserForm(obj=user)
+	return render_template('user_edit.html', form=form, user=user)
+
+
+# ------------ ACCOUNT SETTINGS ---------
+@app.route('/account/settings', methods=['GET', 'POST'])
+@login_required
+def account_settings():
+	user = current_user
+	if request.method == 'POST':
+		form = SettingsForm(request.form)
+		r = request
+		if form.validate():
+			user.gravatar = True if form.avatar_type.data == 'gravatar' else False
+
+			if form.new_password.data:
+				if form.new_password.data != form.old_password.data:
+					if verify_password(form.old_password.data, user.password):
+						user.password = encrypt_password(form.new_password.data)
+					else:
+						form.old_password.errors.append('Wrong old password')
+				else:
+					form.new_password.errors.append('Old and New passwords are the same')
+
+			file = request.files['avatar_file']
+			file_error = False
+			if file:
+				filename = 'avatar_'+str(current_user.id+1024)
+				file_ext = imghdr.what(file)
+				if file_ext in ALLOWED_EXTENSIONS:
+					full_filename = filename+'.'+file_ext
+					size = (200, 200)
+					img = Image.open(file)
+					width, height = img.size
+					if width > height:
+						delta = width - height
+						left = int(delta/2)
+						upper = 0
+						right = height + left
+						lower = height
+					else:
+						delta = height - width
+						left = 0
+						upper = int(delta/2)
+						right = width
+						lower = width + upper
+					img = img.crop((left, upper, right, lower))
+					img.thumbnail(size, Image.ANTIALIAS)
+					img.save(os.path.join(app.config['AVATAR_FOLDER'], full_filename), quality=90, dpi=(72,72))
+					user.avatar_link = full_filename
+				else:
+					form.avatar_file.errors.append('File type is not allowed.')
+					flash('There are errors on the form. Please fix them before continuing.', 'error')
+					file_error = True
+			if file_error == False:
+				db.session.commit()
+				flash('Settings updated successfully.', 'success')
+		else:
+			flash('There are errors on the form. Please fix them before continuing.', 'error')
+	else:
+		form = SettingsForm()
+		form.avatar_type.data = 'gravatar' if user.gravatar == True else 'avatar'
+		form.username.data = user.username
+		form.email.data = user.email
+		form.timezone.data = user.timezone
+	return render_template('settings.html', form=form, user=user, rnd=int(random.random()*1000))
+
+
+
+# ------------ GET by SLUG --------------
+@app.route('/<string:slug>')
+def blog_post(slug):
+	post = Post.query.filter(Post.slug==slug, Post.published_at != None).first()
+	if post != None:
+		meta = Meta(title=post.title+' | Salesforce-Developer.NET',
+				description=post.meta_description,
+				keywords=post.meta_description
+				)
+		return render_template('blog_view.html', post=post, meta=meta)
+	abort(404)
+
+
+# ------------ ERROR HANDLERS ----------
+@app.errorhandler(404)
+def page_not_found(e):
+	flash('Requested resource not found.', 'error')
+	return render_template('error.html'), 404
+
+@app.errorhandler(403)
+def no_permissions(e):
+	flash('You don\'t have the permission to access the requested resource', 'error')
+	return render_template('error.html'), 403
