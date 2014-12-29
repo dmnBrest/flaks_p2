@@ -73,9 +73,11 @@
 			<div class="col-xs-12">
 				<h1>Editor</h1>
 				<br/>
+				{% if post %}
 				<div>
 					<a href="/{{ post.slug }}" >&lt; Back to Article</a>
 				</div>
+				{% endif %}
 				<br/>
 				{% from "_m.html" import form_field %}
 				<form action="" method="POST" novalidate>
@@ -104,7 +106,7 @@
 						</label>
 						<div class="row">
 							<div class="col-md-2">
-								{% if form.thumbnail.data != None and form.thumbnail.data != '' %}
+								{% if form.thumbnail.data %}
 									<img class="thumbnail-preview" src="{{ form.thumbnail.data }}" alt="post thumbnail" style="width: 128px; border: 4px solid #f0f0f0;" />
 								{% else %}
 									<img class="thumbnail-preview" src="/static/no-image.jpg" alt="post thumbnail" style="width: 128px; border: 4px solid#f0f0f0;" />
@@ -128,7 +130,7 @@
 					{{ form_field(form.meta_keywords, with_label=True) }}
 					{{ form_field(form.meta_description, with_label=True) }}
 					<br/>
-					{% if post != None %}
+					{% if post %}
 						<div class="row">
 							<div class="col-md-2">
 								{{ form_field(form.published) }}

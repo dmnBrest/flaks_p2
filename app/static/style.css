@@ -8,6 +8,12 @@ blockquote .quote_author {font-style: italic; font-size: 12px; margin-bottom: 6p
 
 h1 {margin-top: 0;}
 
+/* change Bootstrap */
+.btn-sm {border-radius: 0; padding: 5px 15px;}
+.btn-sm:hover {background-color: #00B5DD; border-color: #00B5DD; color: #fff;}
+.btn {border-radius: 0;}
+.form-control {border-radius: 0;}
+
 .c-clear {width: 100%; clear: both;}
 
 .hidden {display: none !important;}
@@ -17,6 +23,7 @@ form .help-block {font-size: 12px;}
 .flashbox {padding: 5px 0; color: #FFFFFF;}
 .flashbox.flash-error {background-color: #e74c3c;}
 .flashbox.flash-info {background-color: #3498db;}
+.flashbox.flash-warning {background-color: #FFAE00;}
 .flashbox.flash-success {background-color: #40d47e;}
 
 .c-auth h1 {margin: 60px 0 20px 0; font-size: 30px;}
@@ -56,14 +63,14 @@ form .help-block {font-size: 12px;}
 .pics-gallery .img-wrapper a {display:inline-block; padding: 1px 3px;}
 .pics-gallery .img-wrapper a:hover {background-color: #00b2ff; color: #fff;}
 
-.article-list article {border-top: 2px solid #00B4DC; padding: 20px; margin-bottom: 30px;}
+.article-list article {border-top: 2px solid #00B4DC; padding: 20px 0; margin-bottom: 30px;}
 article h1 {color: #00b2ff;}
 article h1, article h2, article h3  {margin-top: 0; font-weight: 300;}
 article .article-img {display: block; text-align: center;}
-article .article-thumbnail {text-align: center; margin: 20px 0;}
+article .article-thumbnail {text-align: center; margin-top: 20px;}
 article .article-thumbnail img {max-width: 500px;}
 article .article-info {}
-article .article-preview {font-size: 16px;}
+article .article-preview {font-size: 16px; margin-top: 20px;}
 article .article-body {font-size: 16px;}
 article .article-actions {margin-top: 10px;}
 
@@ -82,7 +89,17 @@ article .article-actions {margin-top: 10px;}
 font-weight: 300;}
 .home .box-1-1 a:hover {color: #000; background-color: #fff;}
 
-.home .box-2 {padding-top: 40px;}
+.home .box-2 {padding: 40px 0 60px 0;}
+.home .box-2 .box-2-title {margin-bottom: 24px;}
+.home .box-2 .box-2-title a {font-size: 34px; font-weight: 300;}
 .home .box-2 img {width: 196px;}
+
+.home .box-3 {min-height: 450px; padding: 40px 0; background: url('/static/faces.jpg') no-repeat top center;}
+.home .box-3-title {margin-top: 30px; font-size: 34px; font-weight: 200; color: #fff;}
+.home .box-3-img img {margin: 20px 0; width: 64px;}
+.home .box-3-content {margin-top: 20px; margin-bottom: 30px; color: #fff; font-size: 19px; font-weight: 200;}
+
+.home .box-4 {padding: 40px 0;}
+.home .box-4-title {font-size: 32px; font-weight: 200;}
 
 @media (min-width: 992px) { .md-right {text-align: right;} }

@@ -53,7 +53,7 @@
 				<div class="row">
 					<div class="col-xs-12 text-right">
 						{% if current_user.is_authenticated() %}
-    						Welcome, <a href="/user/{{ current_user.slug }}">{{ current_user.fullname() }}</a> (Admin: {{ current_user.has_role('admin') }} Editor: {{ current_user.has_role('editor') }})&nbsp;&nbsp;|&nbsp;&nbsp;<a href="/logout">Sign Out</a>
+    						Welcome, <a href="/user/{{ current_user.slug }}">{{ current_user.fullname() }}</a> (Admin: {{ current_user.has_role('admin') }} Editor: {{ current_user.has_role('editor') }})&nbsp;&nbsp;|&nbsp;&nbsp;<a href="{{ config['SECURITY_LOGOUT_URL'] }}">Sign Out</a>
 						{% else %}
 							<a href="{{ config['SECURITY_LOGIN_URL'] }}">Sign In</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="{{ config['SECURITY_REGISTER_URL'] }}">Sign Up</a>
 						{% endif %}

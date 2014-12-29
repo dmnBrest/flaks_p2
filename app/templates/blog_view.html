@@ -20,16 +20,16 @@
 							</div>
 						</div>
 					</div>
-					<div class="article-thumbnail">
-						{% if post.thumbnail != None %}
+					{% if post.thumbnail %}
+						<div class="article-thumbnail">
 							<img src="{{ post.thumbnail }}" alt=""/>
-						{% endif %}
-					</div>
+						</div>
+					{% endif %}
 					<div class="article-preview">
 						{{ post.preview_html | safe }}
 					</div>
 					<div class="article-body">
-						{% if post.body_html != None %}
+						{% if post.body_html %}
 							{{ post.body_html | safe }}
 						{% endif %}
 					</div>

@@ -9,7 +9,7 @@ from wtforms import StringField, TextAreaField, BooleanField, \
 from flask_wtf.file import FileField, FileAllowed
 
 class BlogPostForm(Form):
-	title 				= StringField('Title', [validators.DataRequired(), validators.Length(min=20, max=255)])
+	title 				= StringField('Title', [validators.DataRequired(), validators.Length(min=8, max=255)])
 	body 				= TextAreaField('Body', [validators.length(min=20, max=200)])
 	thumbnail			= StringField('Thumbnail', [validators.length(max=255)])
 	meta_keywords 		= StringField('Keywords', [validators.length(max=255)])

@@ -18,29 +18,33 @@
 				<br />
 				{% for post in posts %}
 					<article>
-						<div>
-							<a href="/{{ post.slug }}">
-								<h2>{{ post.title }}</h2>
-							</a>
+						<div class="row">
+							<div class="col-md-10">
+								<a href="/{{ post.slug }}">
+									<h2>{{ post.title }}</h2>
+								</a>
+							</div>
+							<div class="col-md-2 md-right">
+								{% if post.user_id == current_user.id %}
+									&nbsp;&nbsp;
+									<a href="{{ url_for('blog_edit_post', slug=post.slug) }}" class="btn btn-default btn-sm">Edit</a>
+								{% endif %}
+							</div>
 						</div>
 						<div class="article-info">
 							<span><a href="/user/{{ post.user.slug }}">{{ post.user.username }}</a></span>,
 							<span>{{ post.published_at }}</span>
 						</div>
-						<div class="article-thumbnail">
-							{% if post.thumbnail != None %}
+						{% if post.thumbnail %}
+							<div class="article-thumbnail">
 								<img src="{{ post.thumbnail }}" alt=""/>
-							{% endif %}
-						</div>
+							</div>
+						{% endif %}
 						<div class="article-preview">
 							{{ post.preview_html|safe }}
 						</div>
 						<div class="article-actions">
 							<a href="/{{ post.slug }}">more ...</a>
-							{% if post.user_id == current_user.id %}
-								&nbsp;&nbsp;
-								<a href="{{ url_for('blog_edit_post', slug=post.slug) }}" class="btn btn-default btn-sm">Edit</a>
-							{% endif %}
 						</div>
 					</article>
 				{% endfor %}

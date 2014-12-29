@@ -3,43 +3,128 @@
 	<div class="home">
 		<div class="box-1">
 			<div class="box-1-1">
-			<div class="container">
-				<div class="row">
-					<div class="col-xs-12">
-						<p>Welcome to</p>
-						<p>Salesforce Developers Network</p>
-						<p>Next Generation Communications</p>
-						<p>
-							<a href="">Login</a>
-							&nbsp;&nbsp;
-							<a href="">Sign up</a>
-						</p>
+				<div class="container">
+					<div class="row">
+						<div class="col-xs-12">
+							<p>Welcome to</p>
+							<p>Salesforce Developers Network</p>
+							<p>Next Generation Communications</p>
+							<p>
+								<a href="">Login</a>
+								&nbsp;&nbsp;
+								<a href="">Sign up</a>
+							</p>
+						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 
 		<div class="box-2">
 			<div class="container">
 				<div class="row">
 					<div class="col-md-4 text-center">
-						<div>
-							<img src="/static/books_i.png" alt=""/>
+						<div class="box-2-icon">
+							<a href="{{ url_for('blog_list') }}"><img src="/static/books_i.png" alt=""/></a>
+						</div>
+						<div class="box-2-title">
+							<a href="{{ url_for('blog_list') }}">Blog</a>
+						</div>
+						<div class="box-2-content">
+							Lorem ipsum dolor sit amet, consectetur adipisicing elit.
+							A ad aperiam beatae commodi consequuntur cupiditate deleniti deserunt,
+							ducimus eius eligendi eos error excepturi fuga id inventore itaque.
 						</div>
 					</div>
 					<div class="col-md-4 text-center">
 						<div>
-							<img src="/static/forum_i.png" alt=""/>
+							<a href="/forum"><img src="/static/forum_i.png" alt=""/></a>
+						</div>
+						<div class="box-2-title">
+							<a href="/forum">Forum</a>
+						</div>
+						<div class="box-2-content">
+							A ad aperiam beatae commodi consequuntur cupiditate deleniti deserunt,
+							ducimus eius eligendi eos error excepturi fuga id inventore itaque, magni maiores minus
+							nam natus necessitatibus obcaecati omnis optio perferendis quibusdam quis quod quos
+							repellendus rerum similique sunt ullam.
 						</div>
 					</div>
 					<div class="col-md-4 text-center">
 						<div>
-							<img src="/static/group_i.png" alt=""/>
+							<a href="/commumity"><img src="/static/group_i.png" alt=""/></a>
+						</div>
+						<div class="box-2-title">
+							<a href="/commumity">Community</a>
+						</div>
+						<div class="box-2-content">
+							Lorem ipsum dolor sit amet, consectetur adipisicing elit. A ad aperiam beatae commodi
+							consequuntur cupiditate deleniti deserunt, ducimus eius eligendi eos error
+							excepturi fuga id inventore itaque, magni maiores minus nam natus necessitatibus obcaecati.
 						</div>
 					</div>
 				</div>
 			</div>
+		</div>
+
+		<div class="box-3">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-6 text-center">
+						<div class="box-3-title">
+							for Developers
+						</div>
+						<div class="box-3-img">
+							<img src="/static/tools.png" alt=""/>
+						</div>
+						<div class="box-3-content">
+							Best way to find solution for problems,
+							to help others developers with they code,
+							to share your knowledge,
+							to find best practices,
+							to create your resume,
+							to find new job.
+						</div>
+					</div>
+					<div class="col-md-6 text-center">
+						<div class="box-3-title">
+							for Customers
+						</div>
+						<div class="box-3-img">
+							<img src="/static/customer.png" alt=""/>
+						</div>
+						<div class="box-3-content">
+							You have a chance to ask a question to best Salesforce developers,
+							to understand more about CRM,
+							to find new relationships,
+							to offer a job and find executors,
+							to make your business better.
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="box-4">
+			<div class="container">
+				<div class="row">
+					<div class="col-xs-12">
+						<div class="from-blog">
+							<div class="box-4-title">Latest from Blog</div>
+						</div>
+						<div class="from-forum md-right">
+							<div class="box-4-title">Latest from Forum</div>
+						</div>
+						<div class="from-blog">
+							<div class="box-4-title">Recent Activity</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div style="height: 200px;">
+
 		</div>
 	</div>
 {% endblock %}

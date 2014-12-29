@@ -30,11 +30,6 @@ def home():
 	# msg.html = "<b>testing</b>"
 	# mail.send(msg)
 
-	# p1 = Picture.query.first()
-	# db.session.delete(p1)
-	# db.session.commit()
-	# app.logger.debug('p1 deleted')
-
 	u1 = User.query.first()
 	u1.first_name = 'f1'
 	u1.last_name = 'l1'
@@ -227,9 +222,10 @@ def blog_edit_post(slug):
 			if form.published.data == False and post.published_at != None:
 				post.published_at = None
 			db.session.commit()
-			flash('Post updated successfully. You can continue editing or return to Article List.', 'success')
 			if request.form['submit'] == 'Save & Exit':
+				flash('Post updated successfully.')
 				return redirect(url_for('blog_post', slug=post.slug))
+			flash('Post updated successfully. You can continue editing or return to Article List.', 'success')
 			return redirect(url_for('blog_edit_post', slug=post.slug))
 		else:
 			flash('There are errors on the form. Please fix them before continuing.', 'error')
@@ -367,14 +363,17 @@ def account_settings():
 # ------------ GET by SLUG --------------
 @app.route('/<string:slug>')
 def blog_post(slug):
-	post = Post.query.filter(Post.slug==slug, Post.published_at != None).first()
-	if post != None:
-		meta = Meta(title=post.title+' | Salesforce-Developer.NET',
-				description=post.meta_description,
-				keywords=post.meta_description
-				)
-		return render_template('blog_view.html', post=post, meta=meta)
-	abort(404)
+	post = Post.query.filter(Post.slug==slug).first()
+	if post is None or (post.published_at is None and post.user_id != current_user.id):
+		abort(404)
+	if post.published_at is None:
+		flash('This post is not published. Only you can see it.', 'warning')
+	meta = Meta(title=post.title+' | Salesforce-Developer.NET',
+			description=post.meta_description,
+			keywords=post.meta_description
+			)
+	return render_template('blog_view.html', post=post, meta=meta)
+
 
 
 # ------------ ERROR HANDLERS ----------
