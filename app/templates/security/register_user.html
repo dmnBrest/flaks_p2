@@ -4,14 +4,15 @@
 		<div class="row">
 			<div class="col-md-6 col-md-offset-3">
 				{% from "_m.html" import form_field %}
-				<h1>Register</h1>
+				<h1>Sign Up</h1>
 				<form action="{{ url_for_security('register') }}" method="POST" name="register_user_form">
-					{{ register_user_form.hidden_tag() }}
+					{{ register_user_form.csrf_token() }}
+					<input type=hidden value="{{ session['prev_url'] or '' }}" name="next" />
 					{{ form_field(register_user_form.email, with_label=True) }}
 					{{ form_field(register_user_form.username, with_label=True) }}
 					{{ form_field(register_user_form.password, with_label=True) }}
 					{% if register_user_form.password_confirm %}
-					{{ form_field(register_user_form.password_confirm, with_label=True) }}
+						{{ form_field(register_user_form.password_confirm, with_label=True) }}
 					{% endif %}
 					{{ form_field(register_user_form.submit) }}
 				</form>
