@@ -401,14 +401,27 @@ def account_settings():
 		form.timezone.data = user.timezone
 	return render_template('settings.html', form=form, user=user, rnd=int(random.random()*1000))
 
+
 # ------------ FORUM --------------------
 @app.route('/forum')
 def forum_list():
 	return render_template('forum_list.html')
 
+
 @app.route('/forum/<string:slug>')
 def forum_view(slug):
 	return render_template('forum_view.html')
+
+
+# ------------ COMMUNITY ----------------
+@app.route('/community')
+def community_map():
+	return render_template('community_map.html')
+
+
+@app.route('/community/list')
+def community_list():
+	return render_template('community_list.html')
 
 
 # ------------ GET by SLUG --------------
