@@ -30,6 +30,13 @@ form .help-block {font-size: 12px;}
 .c-auth-menu {text-align: right;}
 .c-auth-menu li {list-style-type: none;}
 
+.pagination-box {text-align: center;}
+.pagination-box li {list-style-type: none; display: inline-block;}
+.pagination-box li>a {padding: 5px 10px;}
+.pagination-box li>a:hover {background-color: #f0f0f0;}
+.pagination-box .active>a {
+	background-color: #3FA4CD; border-color: #3FA4CD; color: #fff;
+}
 
 .c-top-header {}
 .c-header {}
@@ -66,6 +73,7 @@ form .help-block {font-size: 12px;}
 .article-list article {border-top: 2px solid #00B4DC; padding: 20px 0; margin-bottom: 30px;}
 article h1 {color: #00b2ff;}
 article h1, article h2, article h3  {margin-top: 0; font-weight: 300;}
+article .article-title h1, article .article-title h2 {display: inline-block;}
 article .article-img {display: block; text-align: center;}
 article .article-thumbnail {text-align: center; margin-top: 20px;}
 article .article-thumbnail img {max-width: 500px;}

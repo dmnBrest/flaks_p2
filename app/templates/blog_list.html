@@ -5,24 +5,37 @@
 			<div class="col-xs-12">
 				<div class="row">
 					<div class="col-md-8">
-						<h1>Blog</h1>
+						{% if author is defined %}
+							<h1>Articles by {{ author.fullname() }}</h1>
+						{% elif my_drafts is defined %}
+							<h1>My Drafts</h1>
+						{% else %}
+							<h1>Blog</h1>
+						{% endif %}
 					</div>
 					<div class="col-md-4">
 						<div class="article-actions md-right">
 							{% if current_user.has_role('editor') %}
+								<a href="{{ url_for('blog_by_author', user_slug=current_user.slug) }}">My Articles</a>
+								&nbsp;&nbsp;
+								<a href="{{ url_for('blog_my_drafts') }}">Drafts ({{ total_drafts }})</a>
+								&nbsp;&nbsp;
 								<a href="{{ url_for('blog_new_post') }}" class="btn btn-default btn-sm">New Article</a>
 							{% endif %}
 						</div>
 					</div>
 				</div>
 				<br />
-				{% for post in posts %}
+				{% for post in posts.items %}
 					<article>
 						<div class="row">
-							<div class="col-md-10">
+							<div class="col-md-10 article-title">
 								<a href="/{{ post.slug }}">
 									<h2>{{ post.title }}</h2>
 								</a>
+								{% if not post.published_at %}
+									<span class="label label-danger" style="vertical-align: top;">Draft</span>
+								{% endif %}
 							</div>
 							<div class="col-md-2 md-right">
 								{% if post.user_id == current_user.id %}
@@ -48,6 +61,11 @@
 						</div>
 					</article>
 				{% endfor %}
+
+				{% from "_pagination.html" import render_pagination %}
+				{{ render_pagination(posts, 'blog_list') }}
+
+
 			</div>
 		</div>
 	</div>

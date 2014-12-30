@@ -6,8 +6,11 @@
 
 				<article>
 					<div class="row">
-						<div class="col-md-8">
+						<div class="col-md-8 article-title">
 							<h1>{{ post.title }}</h1>
+							{% if not post.published_at %}
+								<span class="label label-danger" style="vertical-align: top;">Draft</span>
+							{% endif %}
 							<div class="article-info">
 								<span>{{ post.user.username }}</span>, <span>{{ post.published_at }}</span>
 							</div>

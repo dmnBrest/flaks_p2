@@ -14,7 +14,7 @@ from forms import BlogPostForm, UserForm, SettingsForm
 from flask.ext.security import login_required, roles_required, current_user
 from flask.ext.security.utils import verify_password, encrypt_password
 from unidecode import unidecode
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, load_only
 import random
 
 @app.route('/')
@@ -164,14 +164,48 @@ def get_avatars(filename):
 
 # ------------- EDITOR -------------------------------
 @app.route("/blog/")
-def blog_list():
-	posts = Post.query.options(joinedload('user')).filter(Post.published_at != None).order_by(Post.published_at.desc())
+@app.route("/blog/page/<int:page>")
+def blog_list(page=1):
+	posts = Post.query.options(joinedload('user').load_only('username')).\
+			filter(Post.published_at is not None).\
+			order_by(Post.published_at.desc()).\
+			paginate(page, 1, True)
+	if current_user.has_role('editor'):
+		total_drafts = Post.query.options(load_only('id')).filter(Post.user_id == current_user.id, Post.published_at == None).count()
 	meta = Meta(title='Blog | Salesforce-Developer.NET',
 				description='Blog for Salesforce Developers with main technical information and examples of apex code.',
 				keywords='salesforce blog, apex blog, visualforce blog'
 				)
 
-	return render_template('blog_list.html', posts=posts, meta=meta)
+	return render_template('blog_list.html', posts=posts, meta=meta, total_drafts=total_drafts)
+
+@app.route("/blog/author/<string:user_slug>")
+@app.route("/blog/author/<string:user_slug>/page/<int:page>")
+def blog_by_author(user_slug, page=1):
+	user = User.query.filter_by(slug=user_slug).first_or_404()
+	posts = Post.query.options(joinedload('user')).filter(Post.user_id == user.id, Post.published_at != None).order_by(Post.published_at.desc()).paginate(page, 10, True)
+	if current_user.has_role('editor'):
+		total_drafts = Post.query.options(load_only('id')).filter(Post.user_id == current_user.id, Post.published_at == None).count()
+	meta = Meta(title='Articles by '+user.fullname()+' | Salesforce-Developer.NET',
+				description='All articler by '+user.fullname()+' published on Salesforce-Developer.net',
+				keywords='salesforce articles, '+user.fullname()
+				)
+
+	return render_template('blog_list.html', posts=posts, meta=meta, author=user, total_drafts=total_drafts)
+
+@app.route("/blog/drafts/")
+@app.route("/blog/drafts/page/<int:page>")
+@roles_required('editor')
+def blog_my_drafts(page=1):
+	posts = Post.query.options(joinedload('user')).filter(Post.user_id == current_user.id, Post.published_at == None).order_by(Post.created_at.desc()).paginate(page, 10, True)
+	if current_user.has_role('editor'):
+		total_drafts = Post.query.options(load_only('id')).filter(Post.user_id == current_user.id, Post.published_at == None).count()
+	meta = Meta(title='My Drafts | Salesforce-Developer.NET',
+				description='My drafts on Salesforce-Developer.net',
+				keywords='my drafts'
+				)
+
+	return render_template('blog_list.html', posts=posts, meta=meta, my_drafts=True, total_drafts=total_drafts)
 
 
 @app.route("/blog/new", methods=['GET', 'POST'])
