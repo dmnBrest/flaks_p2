@@ -9,7 +9,7 @@ import simplejson
 import traceback
 from werkzeug.utils import secure_filename
 import imghdr
-from models import User, Role, Picture, Post, Meta
+from models import User, Picture, Post, Meta, Forum, ForumTopic, ForumPost
 from forms import BlogPostForm, UserForm, SettingsForm
 from flask.ext.security import login_required, roles_required, current_user
 from flask.ext.security.utils import verify_password, encrypt_password
@@ -163,7 +163,7 @@ def get_avatars(filename):
 	return send_from_directory(os.path.join(app.config['AVATAR_FOLDER']), filename=secure_filename(filename))
 
 # ------------- EDITOR -------------------------------
-@app.route("/blog/")
+@app.route("/blog")
 @app.route("/blog/page/<int:page>")
 def blog_list(page=1):
 	posts = Post.query.options(joinedload('user')).\
@@ -401,23 +401,34 @@ def account_settings():
 		form.timezone.data = user.timezone
 	return render_template('settings.html', form=form, user=user, rnd=int(random.random()*1000))
 
+# ------------ FORUM --------------------
+@app.route('/forum')
+def forum_list():
+	return render_template('forum_list.html')
+
+@app.route('/forum/<string:slug>')
+def forum_view(slug):
+	return render_template('forum_view.html')
 
 
 # ------------ GET by SLUG --------------
 @app.route('/<string:slug>')
 def blog_post(slug):
 	post = Post.query.filter(Post.slug==slug).first()
-	if post is None or (post.published_at is None and post.user_id != current_user.id):
-		abort(404)
-	if post.published_at is None:
-		flash('This post is not published. Only you can see it.', 'warning')
-	meta = Meta(title=post.title+' | Salesforce-Developer.NET',
-			description=post.meta_description,
-			keywords=post.meta_description
-			)
-	return render_template('blog_view.html', post=post, meta=meta)
-
-
+	if post:
+		if post.published_at is None and post.user_id != current_user.id:
+			abort(404)
+		if post.published_at is None:
+			flash('This post is not published. Only you can see it.', 'warning')
+		meta = Meta(title=post.title+' | Salesforce-Developer.NET',
+				description=post.meta_description,
+				keywords=post.meta_description
+				)
+		return render_template('blog_view.html', post=post, meta=meta)
+	topic = ForumTopic.query.filter(Post.slug==slug).first()
+	if topic:
+		return render_template('topic_view.html')
+	abort(404)
 
 # ------------ ERROR HANDLERS ----------
 @app.errorhandler(404)

@@ -100,7 +100,7 @@ def seed():
 	admin_role = user_datastore.create_role(name='admin', description='Administrator')
 	editor_role = user_datastore.create_role(name='editor', description='Blog Editor')
 
-	u1 = user_datastore.create_user(username='doom1', email='admin@test.com', password=utils.encrypt_password('doomdoom1'), active=True, confirmed_at=datetime.datetime.now())
+	u1 = user_datastore.create_user(username='admin', email='admin@test.com', password=utils.encrypt_password('doomdoom1'), active=True, confirmed_at=datetime.datetime.now())
 	u2 = user_datastore.create_user(username='doom1', email='doom1@test.com', password=utils.encrypt_password('doomdoom1'), active=True, confirmed_at=datetime.datetime.now())
 	u3 = user_datastore.create_user(username='doom2', email='doom2@test.com', password=utils.encrypt_password('doomdoom1'), active=True, confirmed_at=datetime.datetime.now())
 

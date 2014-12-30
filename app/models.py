@@ -166,7 +166,7 @@ class Post(db.Model):
 	slug				= db.Column(db.String(255), unique=True, nullable=False)
 	title				= db.Column(db.String(255), nullable=False)
 	thumbnail			= db.Column(db.String(255))
-	type				= db.Column(db.Enum('blog','forum','other'))
+	type				= db.Column(db.String(255))
 	body				= db.Column(db.Text)
 	preview_html		= db.Column(db.Text)
 	body_html			= db.Column(db.Text)
@@ -192,6 +192,47 @@ def before_insert_post(mapper, connection, target):
 
 	if target.slug is None:
 		target.slug = safe_slugify(Post, target, target.title)
+
+
+class Forum(db.Model):
+	id					= db.Column(db.Integer(), primary_key=True)
+	slug				= db.Column(db.String(255), unique=True, nullable=False)
+	title				= db.Column(db.String(255), nullable=False)
+	description			= db.Column(db.Text)
+	total_topics		= db.Column(db.Integer)
+	last_topic_id		= db.Column(db.Integer)
+	__mapper_args__ = {'extension': AuditExtension()}
+
+
+class ForumTopic(db.Model):
+	id					= db.Column(db.Integer(), primary_key=True)
+	slug				= db.Column(db.String(255), unique=True, nullable=False)
+	title				= db.Column(db.String(255), nullable=False)
+	body				= db.Column(db.Text)
+	body_html			= db.Column(db.Text)
+	total_posts			= db.Column(db.Integer)
+	last_post_id		= db.Column(db.Integer)
+	user_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
+	user 				= db.relationship("User")
+	forum_id			= db.Column(db.Integer, db.ForeignKey('forum.id'))
+	forum 				= db.relationship("Forum")
+	__mapper_args__ = {'extension': AuditExtension()}
+
+
+class ForumPost(db.Model):
+	id					= db.Column(db.Integer(), primary_key=True)
+	slug				= db.Column(db.String(255), unique=True, nullable=False)
+	title				= db.Column(db.String(255), nullable=False)
+	body				= db.Column(db.Text)
+	body_html			= db.Column(db.Text)
+	user_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
+	user 				= db.relationship("User")
+	forum_topic_id		= db.Column(db.Integer, db.ForeignKey('forum_topic.id'))
+	forum_topic			= db.relationship("ForumTopic")
+	__mapper_args__ = {'extension': AuditExtension()}
+
+
+#class Vote(db.Model):
 
 
 # --------- Helpers ----------------------
