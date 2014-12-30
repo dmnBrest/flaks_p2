@@ -122,13 +122,14 @@ def before_update_user(mapper, connection, target):
 	if target.geo_lat == None or target.geo_lng == None:
 		if target.current_login_ip != None:
 			ip_data = ipquery(target.current_login_ip)
-			target.geo_lat = ip_data['latitude']
-			target.geo_lng = ip_data['longitude']
-			target.timezone = ip_data['time_zone']
-			if ip_data['city'] != None:
-				target.geo_address = ip_data['city']+', '+ip_data['country_name']
-			else:
-				target.geo_address = ip_data['country_name']
+			if ip_data:
+				target.geo_lat = ip_data['latitude']
+				target.geo_lng = ip_data['longitude']
+				target.timezone = ip_data['time_zone']
+				if ip_data['city']:
+					target.geo_address = ip_data['city']+', '+ip_data['country_name']
+				else:
+					target.geo_address = ip_data['country_name']
 
 
 # --------- PICTURE -----------------

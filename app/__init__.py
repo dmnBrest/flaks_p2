@@ -100,9 +100,9 @@ def seed():
 	admin_role = user_datastore.create_role(name='admin', description='Administrator')
 	editor_role = user_datastore.create_role(name='editor', description='Blog Editor')
 
-	u1 = user_datastore.create_user(username='dmnadmin', email='dmitry.shnyrev@gmail.com', password=utils.encrypt_password('doomdoom1'), active=True, confirmed_at=datetime.datetime.now())
-	u2 = user_datastore.create_user(username='doom1', email='doom1@doom1.com', password=utils.encrypt_password('doomdoom1'), active=True, confirmed_at=datetime.datetime.now())
-	u3 = user_datastore.create_user(username='doom2', email='doom2@doom2.com', password=utils.encrypt_password('doomdoom1'), active=True, confirmed_at=datetime.datetime.now())
+	u1 = user_datastore.create_user(username='doom1', email='admin@test.com', password=utils.encrypt_password('doomdoom1'), active=True, confirmed_at=datetime.datetime.now())
+	u2 = user_datastore.create_user(username='doom1', email='doom1@test.com', password=utils.encrypt_password('doomdoom1'), active=True, confirmed_at=datetime.datetime.now())
+	u3 = user_datastore.create_user(username='doom2', email='doom2@test.com', password=utils.encrypt_password('doomdoom1'), active=True, confirmed_at=datetime.datetime.now())
 
 	user_datastore.add_role_to_user(u1, editor_role)
 	user_datastore.add_role_to_user(u1, admin_role)

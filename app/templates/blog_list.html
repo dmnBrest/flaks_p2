@@ -38,14 +38,11 @@
 								{% endif %}
 							</div>
 							<div class="col-md-2 md-right">
-								{% if post.user_id == current_user.id %}
-									&nbsp;&nbsp;
-									<a href="{{ url_for('blog_edit_post', slug=post.slug) }}" class="btn btn-default btn-sm">Edit</a>
-								{% endif %}
+
 							</div>
 						</div>
 						<div class="article-info">
-							<span><a href="/user/{{ post.user.slug }}">{{ post.user.username }}</a></span>,
+							<span><a href="{{ url_for('user_view', slug=post.user.slug) }}">{{ post.user.fullname() }}</a></span>,
 							<span>{{ post.published_at }}</span>
 						</div>
 						{% if post.thumbnail %}

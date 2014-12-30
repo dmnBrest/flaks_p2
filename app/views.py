@@ -166,10 +166,11 @@ def get_avatars(filename):
 @app.route("/blog/")
 @app.route("/blog/page/<int:page>")
 def blog_list(page=1):
-	posts = Post.query.options(joinedload('user').load_only('username')).\
-			filter(Post.published_at is not None).\
+	posts = Post.query.options(joinedload('user')).\
+			filter(Post.published_at != None).\
 			order_by(Post.published_at.desc()).\
-			paginate(page, 1, True)
+			paginate(page, 10, True)
+	total_drafts = None
 	if current_user.has_role('editor'):
 		total_drafts = Post.query.options(load_only('id')).filter(Post.user_id == current_user.id, Post.published_at == None).count()
 	meta = Meta(title='Blog | Salesforce-Developer.NET',
@@ -183,7 +184,11 @@ def blog_list(page=1):
 @app.route("/blog/author/<string:user_slug>/page/<int:page>")
 def blog_by_author(user_slug, page=1):
 	user = User.query.filter_by(slug=user_slug).first_or_404()
-	posts = Post.query.options(joinedload('user')).filter(Post.user_id == user.id, Post.published_at != None).order_by(Post.published_at.desc()).paginate(page, 10, True)
+	posts = Post.query.options(joinedload('user')).\
+			filter(Post.user_id == user.id, Post.published_at != None).\
+			order_by(Post.published_at.desc()).\
+			paginate(page, 10, True)
+	total_drafts = None
 	if current_user.has_role('editor'):
 		total_drafts = Post.query.options(load_only('id')).filter(Post.user_id == current_user.id, Post.published_at == None).count()
 	meta = Meta(title='Articles by '+user.fullname()+' | Salesforce-Developer.NET',
@@ -197,7 +202,11 @@ def blog_by_author(user_slug, page=1):
 @app.route("/blog/drafts/page/<int:page>")
 @roles_required('editor')
 def blog_my_drafts(page=1):
-	posts = Post.query.options(joinedload('user')).filter(Post.user_id == current_user.id, Post.published_at == None).order_by(Post.created_at.desc()).paginate(page, 10, True)
+	posts = Post.query.options(joinedload('user')).\
+			filter(Post.user_id == current_user.id, Post.published_at == None).\
+			order_by(Post.created_at.desc()).\
+			paginate(page, 10, True)
+	total_drafts = None
 	if current_user.has_role('editor'):
 		total_drafts = Post.query.options(load_only('id')).filter(Post.user_id == current_user.id, Post.published_at == None).count()
 	meta = Meta(title='My Drafts | Salesforce-Developer.NET',
@@ -257,7 +266,7 @@ def blog_edit_post(slug):
 				post.published_at = None
 			db.session.commit()
 			if request.form['submit'] == 'Save & Exit':
-				flash('Post updated successfully.')
+				flash('Post updated successfully.', 'success')
 				return redirect(url_for('blog_post', slug=post.slug))
 			flash('Post updated successfully. You can continue editing or return to Article List.', 'success')
 			return redirect(url_for('blog_edit_post', slug=post.slug))

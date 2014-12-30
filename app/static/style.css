@@ -1,6 +1,6 @@
 body {font-family: "Roboto", Helvetica, Arial, sans-serif;}
 
-a {color: #00A4C8;}
+a {color: #00A4C8; text-decoration: none;}
 a:hover {color: #00b4dc; text-decoration: none;}
 
 blockquote {font-size: inherit; color: #808080; margin: 10px 10px 10px 20px;}
@@ -34,7 +34,7 @@ form .help-block {font-size: 12px;}
 .pagination-box li {list-style-type: none; display: inline-block;}
 .pagination-box li>a {padding: 5px 10px;}
 .pagination-box li>a:hover {background-color: #f0f0f0;}
-.pagination-box .active>a {
+.pagination-box .active>a, .pagination-box .active>a:hover {
 	background-color: #3FA4CD; border-color: #3FA4CD; color: #fff;
 }
 
