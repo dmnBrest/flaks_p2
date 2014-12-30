@@ -21,66 +21,70 @@
 
 	</head>
 	<body>
-		<div class="c-top-header">
-			<div class="container">
-				<div class="row">
-					<div class="col-xs-12">
+		<div class="main-wrapper">
+			<div class="c-top-header">
+				<div class="container">
+					<div class="row">
+						<div class="col-xs-12">
 
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
 
-		<div class="c-header">
-			<div class="container">
-				<div class="row">
-					<div class="col-md-4 c-logo">
-						<a href="/"><img src="/static/sfdevcomlogo.png" alt="salesforce-developer.com LOGO"/></a>
-					</div>
-					<div class="col-md-8 text-right">
-						<ul class="c-main-menu">
-							<li><a href="/blog/"><i class="fa fa-book fa-fw"></i>&nbsp;Blog</a></li>
-							<li><a href="/forum/"><i class="fa fa-comments fa-fw"></i>&nbsp;Forum</a></li>
-							<li><a href="/community/"><i class="fa fa-users fa-fw"></i>&nbsp;Community</a></li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div>
-
-		<div class="c-bottom-header">
-			<div class="container">
-				<div class="row">
-					<div class="col-xs-12 text-right">
-						{% if current_user.is_authenticated() %}
-    						Welcome, <a href="/user/{{ current_user.slug }}">{{ current_user.fullname() }}</a> (Admin: {{ current_user.has_role('admin') }} Editor: {{ current_user.has_role('editor') }})&nbsp;&nbsp;|&nbsp;&nbsp;<a href="{{ config['SECURITY_LOGOUT_URL'] }}">Sign Out</a>
-						{% else %}
-							<a href="{{ config['SECURITY_LOGIN_URL'] }}">Login</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="{{ config['SECURITY_REGISTER_URL'] }}">Sign Up</a>
-						{% endif %}
+			<div class="c-header">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-4 c-logo">
+							<a href="/"><img src="/static/sfdevcomlogo.png" alt="salesforce-developer.com LOGO"/></a>
+						</div>
+						<div class="col-md-8 text-right">
+							<ul class="c-main-menu">
+								<li><a href="/blog/"><i class="fa fa-book fa-fw"></i>&nbsp;Blog</a></li>
+								<li><a href="/forum/"><i class="fa fa-comments fa-fw"></i>&nbsp;Forum</a></li>
+								<li><a href="/community/"><i class="fa fa-users fa-fw"></i>&nbsp;Community</a></li>
+							</ul>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
 
-		{% with messages = get_flashed_messages(with_categories=true) %}
-			{% if messages %}
-				{% for category, message in messages %}
-					<div class="flashbox flash-{{ category }}">
-						<div class="container">
-							<div class="row">
-								<div class="col-xs-12">
-									{{ message }}
+			<div class="c-bottom-header">
+				<div class="container">
+					<div class="row">
+						<div class="col-xs-12 text-right">
+							{% if current_user.is_authenticated() %}
+								Welcome, <a href="/user/{{ current_user.slug }}">{{ current_user.fullname() }}</a> (Admin: {{ current_user.has_role('admin') }} Editor: {{ current_user.has_role('editor') }})&nbsp;&nbsp;|&nbsp;&nbsp;<a href="{{ config['SECURITY_LOGOUT_URL'] }}">Sign Out</a>
+							{% else %}
+								<a href="{{ config['SECURITY_LOGIN_URL'] }}">Login</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href="{{ config['SECURITY_REGISTER_URL'] }}">Sign Up</a>
+							{% endif %}
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{% with messages = get_flashed_messages(with_categories=true) %}
+				{% if messages %}
+					{% for category, message in messages %}
+						<div class="flashbox flash-{{ category }}">
+							<div class="container">
+								<div class="row">
+									<div class="col-xs-12">
+										{{ message }}
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-				{% endfor %}
-			{% endif %}
-		{% endwith %}
+					{% endfor %}
+				{% endif %}
+			{% endwith %}
 
-		<div class="c-content-wrapper">
-			{% block content %}{% endblock %}
+			<div class="c-content-wrapper">
+				{% block content %}{% endblock %}
+			</div>
 		</div>
-
+		<footer>
+			<div class="copyright text-center">© Shnyrev D. 2013—2014</div>
+		</footer>
 	</body>
 </html>
