@@ -4,4 +4,6 @@ GeoLiteCity.dat
 migrations/versions/*
 config.py
 .idea
+app/seed.py
+
 

@@ -10,9 +10,14 @@
 							<p>Salesforce Developers Network</p>
 							<p>Next Generation Communications</p>
 							<p>
-								<a href="{{ config['SECURITY_LOGIN_URL'] }}">Login</a>
-								&nbsp;&nbsp;
-								<a href="{{ config['SECURITY_REGISTER_URL'] }}">Sign up</a>
+								{% if current_user.is_authenticated() %}
+									<br/>
+									{{ current_user.fullname() }}
+								{% else %}
+									<a href="{{ config['SECURITY_LOGIN_URL'] }}">Login</a>
+									&nbsp;&nbsp;
+									<a href="{{ config['SECURITY_REGISTER_URL'] }}">Sign up</a>
+								{% endif %}
 							</p>
 						</div>
 					</div>

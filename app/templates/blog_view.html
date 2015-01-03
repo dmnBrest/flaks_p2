@@ -18,18 +18,16 @@
 						</div>
 						<div class="col-md-4">
 							<div class="article-actions md-right">
-
+								{% if post.user_id == current_user.id and current_user.has_role('editor') %}
+									<div class="post-actions">
+										<a href="{{ url_for('blog_edit_post', slug=post.slug) }}" class="btn btn-default btn-sm" >
+											Edit
+										</a>
+									</div>
+								{% endif %}
 							</div>
 						</div>
 					</div>
-					{% if post.user_id == current_user.id and current_user.has_role('editor') %}
-						<br/>
-						<div class="post-actions">
-							<a href="{{ url_for('blog_edit_post', slug=post.slug) }}" class="btn btn-default btn-sm" >
-								Edit
-							</a>
-						</div>
-					{% endif %}
 					{% if post.thumbnail %}
 						<div class="article-thumbnail">
 							<img src="{{ post.thumbnail }}" alt=""/>

@@ -193,6 +193,13 @@ def before_insert_post(mapper, connection, target):
 	if target.slug is None:
 		target.slug = safe_slugify(Post, target, target.title)
 
+class Comment(db.Model):
+	id					= db.Column(db.Integer(), primary_key=True)
+	body				= db.Column(db.Text)
+	body_html			= db.Column(db.Text)
+	user_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
+	user 				= db.relationship("User")
+
 
 class Forum(db.Model):
 	id					= db.Column(db.Integer(), primary_key=True)
@@ -232,7 +239,18 @@ class ForumPost(db.Model):
 	__mapper_args__ = {'extension': AuditExtension()}
 
 
-#class Vote(db.Model):
+class Vote(db.Model):
+	id					= db.Column(db.Integer(), primary_key=True)
+	user_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
+	user 				= db.relationship("User")
+	forum_topic_id		= db.Column(db.Integer, db.ForeignKey('forum_topic.id'))
+	forum_topic			= db.relationship("ForumTopic")
+	forum_post_id		= db.Column(db.Integer, db.ForeignKey('forum_post.id'))
+	forum_post			= db.relationship("ForumPost")
+	comment_id			= db.Column(db.Integer, db.ForeignKey('comment.id'))
+	comment 			= db.relationship("Comment")
+	type				= db.Column(db.Enum('+1','-1'))
+	__mapper_args__ = {'extension': AuditExtension()}
 
 
 # --------- Helpers ----------------------

@@ -94,22 +94,10 @@ security = Security(app, user_datastore, confirm_register_form=ExtendedRegisterF
 # TOOLBAR
 toolbar = DebugToolbarExtension(app)
 
+from seed import seed_db
 @manager.command
 def seed():
-	"Add seed data to the database."
-	admin_role = user_datastore.create_role(name='admin', description='Administrator')
-	editor_role = user_datastore.create_role(name='editor', description='Blog Editor')
-
-	u1 = user_datastore.create_user(username='admin', email='admin@test.com', password=utils.encrypt_password('doomdoom1'), active=True, confirmed_at=datetime.datetime.now())
-	u2 = user_datastore.create_user(username='doom1', email='doom1@test.com', password=utils.encrypt_password('doomdoom1'), active=True, confirmed_at=datetime.datetime.now())
-	u3 = user_datastore.create_user(username='doom2', email='doom2@test.com', password=utils.encrypt_password('doomdoom1'), active=True, confirmed_at=datetime.datetime.now())
-
-	user_datastore.add_role_to_user(u1, editor_role)
-	user_datastore.add_role_to_user(u1, admin_role)
-
-	user_datastore.add_role_to_user(u2, editor_role)
-
-	db.session.commit()
+	seed_db()
 	print('Seed FINISHED successfully.')
 
 @manager.shell
