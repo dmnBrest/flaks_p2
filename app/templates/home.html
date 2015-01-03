@@ -12,7 +12,7 @@
 							<p>
 								{% if current_user.is_authenticated() %}
 									<br/>
-									{{ current_user.fullname() }}
+									<a href="{{ url_for('user_view', slug=current_user.slug) }}">{{ current_user.fullname() }}</a>
 								{% else %}
 									<a href="{{ config['SECURITY_LOGIN_URL'] }}">Login</a>
 									&nbsp;&nbsp;

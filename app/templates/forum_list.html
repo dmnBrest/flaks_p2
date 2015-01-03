@@ -5,6 +5,12 @@
 			<div class="col-xs-12">
 				<h1>Forums</h1>
 
+				{% for forum in forums %}
+					<div class="forum-item">
+						<a href="{{ url_for('forum_view', slug=forum.slug) }}">{{ forum.title }}</a>
+					</div>
+				{% endfor %}
+
 			</div>
 		</div>
 	</div>

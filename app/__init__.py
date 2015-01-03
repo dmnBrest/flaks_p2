@@ -4,14 +4,14 @@ from flask import Flask, request_started, session, request
 from flask_debugtoolbar import DebugToolbarExtension
 import logging
 from flask.ext.sqlalchemy import SQLAlchemy
-from flask_mail import Mail, Message
-from flask.ext.security import Security, SQLAlchemyUserDatastore, login_required, utils
+from flask_mail import Mail
+from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask_security.forms import ConfirmRegisterForm
 from wtforms import StringField, validators
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
-import datetime
 import bbcode
+
 
 # ----------- LOGGER ----------------------
 # logging.basicConfig() #filename='appx.log'

@@ -79,6 +79,26 @@
 				{% endif %}
 			{% endwith %}
 
+			{% if g.breadcrumbs is defined %}
+				<div class="breadcrumbs">
+					<div class="container">
+						<div class="row">
+							<div class="col-xs-12">
+								<ol class="breadcrumb">
+									{% for b in g.breadcrumbs %}
+										{% if not loop.last %}
+											<li><a href="{{ b.url }}">{{ b.title }}</a></li>
+										{% else %}
+											<li class="active">{{ b.title }}</li>
+										{% endif %}
+									{% endfor %}
+								</ol>
+							</div>
+						</div>
+					</div>
+				</div>
+			{% endif %}
+
 			<div class="c-content-wrapper">
 				{% block content %}{% endblock %}
 			</div>

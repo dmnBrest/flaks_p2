@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from app import app, db, bbcode_parser
-from flask import request, render_template, redirect, url_for, send_from_directory, abort, flash
+from flask import request, render_template, redirect, url_for, send_from_directory, abort, flash, g
 import datetime
 import os
 from PIL import Image
@@ -9,13 +9,14 @@ import simplejson
 import traceback
 from werkzeug.utils import secure_filename
 import imghdr
-from models import User, Picture, Post, Meta, Forum, ForumTopic, ForumPost
+from models import User, Picture, Post, Meta, Forum, ForumTopic, ForumPost, Breadcrumb
 from forms import BlogPostForm, UserForm, SettingsForm
 from flask.ext.security import login_required, roles_required, current_user
 from flask.ext.security.utils import verify_password, encrypt_password
 from unidecode import unidecode
 from sqlalchemy.orm import joinedload, load_only
 import random
+
 
 @app.route('/')
 #@login_required
@@ -166,6 +167,9 @@ def get_avatars(filename):
 @app.route("/blog")
 @app.route("/blog/page/<int:page>")
 def blog_list(page=1):
+	g.breadcrumbs = []
+	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+	g.breadcrumbs.append(Breadcrumb('/blog', 'Blog'))
 	posts = Post.query.options(joinedload('user')).\
 			filter(Post.published_at != None).\
 			order_by(Post.published_at.desc()).\
@@ -184,6 +188,10 @@ def blog_list(page=1):
 @app.route("/blog/author/<string:user_slug>/page/<int:page>")
 def blog_by_author(user_slug, page=1):
 	user = User.query.filter_by(slug=user_slug).first_or_404()
+	g.breadcrumbs = []
+	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+	g.breadcrumbs.append(Breadcrumb('/blog', 'Blog'))
+	g.breadcrumbs.append(Breadcrumb('', user.fullname()))
 	posts = Post.query.options(joinedload('user')).\
 			filter(Post.user_id == user.id, Post.published_at != None).\
 			order_by(Post.published_at.desc()).\
@@ -202,6 +210,10 @@ def blog_by_author(user_slug, page=1):
 @app.route("/blog/drafts/page/<int:page>")
 @roles_required('editor')
 def blog_my_drafts(page=1):
+	g.breadcrumbs = []
+	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+	g.breadcrumbs.append(Breadcrumb('/blog', 'Blog'))
+	g.breadcrumbs.append(Breadcrumb('', 'My Drafts'))
 	posts = Post.query.options(joinedload('user')).\
 			filter(Post.user_id == current_user.id, Post.published_at == None).\
 			order_by(Post.created_at.desc()).\
@@ -220,6 +232,10 @@ def blog_my_drafts(page=1):
 @app.route("/blog/new", methods=['GET', 'POST'])
 @roles_required('editor')
 def blog_new_post():
+	g.breadcrumbs = []
+	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+	g.breadcrumbs.append(Breadcrumb('/blog', 'Blog'))
+	g.breadcrumbs.append(Breadcrumb('', 'New Article'))
 	if request.method == 'POST':
 		form = BlogPostForm(request.form)
 		if form.validate():
@@ -250,6 +266,10 @@ def blog_preview_post():
 @roles_required('editor')
 def blog_edit_post(slug):
 	post = Post.query.filter_by(slug=slug).first_or_404()
+	g.breadcrumbs = []
+	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+	g.breadcrumbs.append(Breadcrumb('/blog', 'Blog'))
+	g.breadcrumbs.append(Breadcrumb('', post.title))
 	if post.user_id != current_user.id:
 		abort(403)
 	if request.method == 'POST':
@@ -267,7 +287,7 @@ def blog_edit_post(slug):
 			db.session.commit()
 			if request.form['submit'] == 'Save & Exit':
 				flash('Post updated successfully.', 'success')
-				return redirect(url_for('blog_post', slug=post.slug))
+				return redirect(url_for('top_slug', slug=post.slug))
 			flash('Post updated successfully. You can continue editing or return to Article List.', 'success')
 			return redirect(url_for('blog_edit_post', slug=post.slug))
 		else:
@@ -283,6 +303,10 @@ def blog_edit_post(slug):
 @app.route("/user/<string:slug>")
 def user_view(slug):
 	user = User.query.filter_by(slug=slug).first_or_404()
+	g.breadcrumbs = []
+	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+	g.breadcrumbs.append(Breadcrumb('/community', 'Community'))
+	g.breadcrumbs.append(Breadcrumb('', user.fullname()))
 	return render_template('user_view.html', user=user)
 
 
@@ -290,6 +314,11 @@ def user_view(slug):
 @login_required
 def user_edit(slug):
 	user = User.query.filter_by(slug=slug).first_or_404()
+	g.breadcrumbs = []
+	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+	g.breadcrumbs.append(Breadcrumb('/community', 'Community'))
+	g.breadcrumbs.append(Breadcrumb('/user/'+slug, user.fullname()))
+	g.breadcrumbs.append(Breadcrumb('', 'Edit My Profile'))
 	if user.id != current_user.id:
 		abort(403)
 	if request.method == 'POST':
@@ -343,6 +372,11 @@ def user_edit(slug):
 @login_required
 def account_settings():
 	user = current_user
+	g.breadcrumbs = []
+	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+	g.breadcrumbs.append(Breadcrumb('/community', 'Community'))
+	g.breadcrumbs.append(Breadcrumb('/user/'+user.slug, user.fullname()))
+	g.breadcrumbs.append(Breadcrumb('', 'Account Settings'))
 	if request.method == 'POST':
 		form = SettingsForm(request.form)
 		r = request
@@ -405,32 +439,57 @@ def account_settings():
 # ------------ FORUM --------------------
 @app.route('/forum')
 def forum_list():
-	return render_template('forum_list.html')
+	g.breadcrumbs = []
+	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+	g.breadcrumbs.append(Breadcrumb('/forum', 'Forum'))
+	forums = Forum.query.order_by('id').all()
+	return render_template('forum_list.html', forums=forums)
 
 
 @app.route('/forum/<string:slug>')
-def forum_view(slug):
-	return render_template('forum_view.html')
+@app.route("/forum/<string:slug>/page/<int:page>")
+def forum_view(slug, page=1):
+	forum = Forum.query.filter_by(slug=slug).first_or_404()
+	g.breadcrumbs = []
+	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+	g.breadcrumbs.append(Breadcrumb('/forum', 'Forum'))
+	g.breadcrumbs.append(Breadcrumb('/forum/'+forum.slug, forum.title))
+	topics = ForumTopic.query.filter_by(forum_id=forum.id).\
+			order_by(ForumTopic.created_at.desc()).\
+			paginate(page, 20, True)
+	return render_template('forum_view.html', forum=forum, topics=topics)
 
 
 # ------------ COMMUNITY ----------------
 @app.route('/community')
 def community_map():
+	g.breadcrumbs = []
+	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+	g.breadcrumbs.append(Breadcrumb('/community', 'Community'))
+	g.breadcrumbs.append(Breadcrumb('', 'Map'))
 	return render_template('community_map.html')
 
 
 @app.route('/community/list')
 def community_list():
+	g.breadcrumbs = []
+	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+	g.breadcrumbs.append(Breadcrumb('/community', 'Community'))
+	g.breadcrumbs.append(Breadcrumb('', 'List'))
 	return render_template('community_list.html')
 
 
 # ------------ GET by SLUG --------------
 @app.route('/<string:slug>')
-def blog_post(slug):
+def top_slug(slug):
 	post = Post.query.filter(Post.slug==slug).first()
 	if post:
 		if post.published_at is None and post.user_id != current_user.id:
 			abort(404)
+		g.breadcrumbs = []
+		g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+		g.breadcrumbs.append(Breadcrumb('/blog', 'Blog'))
+		g.breadcrumbs.append(Breadcrumb('', post.title))
 		if post.published_at is None:
 			flash('This post is not published. Only you can see it.', 'warning')
 		meta = Meta(title=post.title+' | Salesforce-Developer.NET',
@@ -438,9 +497,18 @@ def blog_post(slug):
 				keywords=post.meta_description
 				)
 		return render_template('blog_view.html', post=post, meta=meta)
-	topic = ForumTopic.query.filter(Post.slug==slug).first()
+	topic = ForumTopic.query.filter(ForumTopic.slug==slug).first()
 	if topic:
-		return render_template('topic_view.html')
+		g.breadcrumbs = []
+		g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+		g.breadcrumbs.append(Breadcrumb('/forum', 'Forum'))
+		g.breadcrumbs.append(Breadcrumb('/forum/'+topic.forum.slug, topic.forum.title))
+		g.breadcrumbs.append(Breadcrumb('', topic.title))
+		posts = ForumPost.query.filter_by(topic_id=topic.id).order_by(ForumPost.created_at.desc())
+		meta = Meta(title=topic.title+' | Salesforce-Developer.NET',
+				description=topic.title,
+				keywords=topic.forum.title)
+		return render_template('topic_view.html', topic=topic, posts=posts, meta=meta)
 	abort(404)
 
 # ------------ ERROR HANDLERS ----------

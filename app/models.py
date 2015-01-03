@@ -184,12 +184,11 @@ class Post(db.Model):
 
 @event.listens_for(Post, 'before_insert')
 @event.listens_for(Post, 'before_update')
-def before_insert_post(mapper, connection, target):
+def before_insert_update_post(mapper, connection, target):
 	parts = target.body.split("[more]")
 	target.preview_html = bbcode_parser.format(parts[0].strip())
 	if len(parts) > 1:
 		target.body_html = bbcode_parser.format(parts[1].strip())
-
 	if target.slug is None:
 		target.slug = safe_slugify(Post, target, target.title)
 
@@ -208,7 +207,16 @@ class Forum(db.Model):
 	description			= db.Column(db.Text)
 	total_topics		= db.Column(db.Integer)
 	last_topic_id		= db.Column(db.Integer)
+
+	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+	created_by 			= db.Column(db.Integer())
+	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+	updated_by 			= db.Column(db.Integer())
 	__mapper_args__ = {'extension': AuditExtension()}
+
+@event.listens_for(Forum, 'before_insert')
+def before_insert_forum(mapper, connection, target):
+	target.slug = safe_slugify(Forum, target, target.title)
 
 
 class ForumTopic(db.Model):
@@ -223,20 +231,43 @@ class ForumTopic(db.Model):
 	user 				= db.relationship("User")
 	forum_id			= db.Column(db.Integer, db.ForeignKey('forum.id'))
 	forum 				= db.relationship("Forum")
+
+	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+	created_by 			= db.Column(db.Integer())
+	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+	updated_by 			= db.Column(db.Integer())
 	__mapper_args__ = {'extension': AuditExtension()}
+
+@event.listens_for(ForumTopic, 'before_insert')
+@event.listens_for(ForumTopic, 'before_update')
+def before_insert_update_forum_topic(mapper, connection, target):
+	target.body_html = bbcode_parser.format(target.body.strip())
+	if target.slug is None:
+		target.slug = safe_slugify(ForumTopic, target, target.title)
 
 
 class ForumPost(db.Model):
 	id					= db.Column(db.Integer(), primary_key=True)
-	slug				= db.Column(db.String(255), unique=True, nullable=False)
 	title				= db.Column(db.String(255), nullable=False)
 	body				= db.Column(db.Text)
 	body_html			= db.Column(db.Text)
 	user_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
 	user 				= db.relationship("User")
-	forum_topic_id		= db.Column(db.Integer, db.ForeignKey('forum_topic.id'))
-	forum_topic			= db.relationship("ForumTopic")
+	forum_id			= db.Column(db.Integer, db.ForeignKey('forum.id'))
+	forum				= db.relationship("Forum")
+	topic_id			= db.Column(db.Integer, db.ForeignKey('forum_topic.id'))
+	topic				= db.relationship("ForumTopic")
+
+	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+	created_by 			= db.Column(db.Integer())
+	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+	updated_by 			= db.Column(db.Integer())
 	__mapper_args__ = {'extension': AuditExtension()}
+
+@event.listens_for(ForumPost, 'before_insert')
+@event.listens_for(ForumPost, 'before_update')
+def before_insert_update_forum_topic(mapper, connection, target):
+	target.body_html = bbcode_parser.format(target.body.strip())
 
 
 class Vote(db.Model):
@@ -250,6 +281,11 @@ class Vote(db.Model):
 	comment_id			= db.Column(db.Integer, db.ForeignKey('comment.id'))
 	comment 			= db.relationship("Comment")
 	type				= db.Column(db.Enum('+1','-1'))
+
+	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+	created_by 			= db.Column(db.Integer())
+	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+	updated_by 			= db.Column(db.Integer())
 	__mapper_args__ = {'extension': AuditExtension()}
 
 
@@ -270,6 +306,11 @@ class Meta():
 		self.title = title or app.config['META_TITLE']
 		self.description = description or app.config['META_DESCRIPTION']
 		self.keywords = keywords or app.config['META_KEYWORDS']
+
+class Breadcrumb():
+	 def __init__(self, url, title):
+		self.url = url
+		self.title = title
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 rawdata = pygeoip.GeoIP(os.path.join(basedir, '../GeoLiteCity.dat'))

@@ -3,7 +3,13 @@
 	<div class="container with-padding forum-view">
 		<div class="row">
 			<div class="col-xs-12">
-				<h1>XXXXX</h1>
+				<h1>{{ forum.title }}</h1>
+
+				{% for topic in topics.items %}
+					<div class="topic-item">
+						<a href="{{ url_for('top_slug', slug=topic.slug) }}">{{ topic.title }}</a>
+					</div>
+				{% endfor %}
 
 			</div>
 		</div>

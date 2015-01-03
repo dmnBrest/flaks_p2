@@ -3,7 +3,18 @@
 	<div class="container with-padding topic-view">
 		<div class="row">
 			<div class="col-xs-12">
-				<h1>ZZZZZ</h1>
+				<h1>{{ topic.title }}</h1>
+
+				{% for post in posts %}
+					<div class="post-item">
+						<div>
+							{{ post.title }}
+						</div>
+						<div>
+							{{ post.body_html|safe }}
+						</div>
+					</div>
+				{% endfor %}
 
 			</div>
 		</div>
