@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from app import app, db, bbcode_parser
+from app import app, db, bbcode_parser, redis_store
 from flask import request, render_template, redirect, url_for, send_from_directory, abort, flash, g
 import datetime
 import os
@@ -31,15 +31,21 @@ def home():
 	# msg.html = "<b>testing</b>"
 	# mail.send(msg)
 
-	u1 = User.query.first()
-	u1.first_name = 'f1'
-	u1.last_name = 'l1'
-	u1.current_login_ip = '37.212.40.101'
-	u1.slug = None
-	db.session.commit()
 
-	name = 'DMN'
-	return render_template('home.html', name=name)
+
+	# u1 = User.query.first()
+	# u1.first_name = 'f1'
+	# u1.last_name = 'l1'
+	# u1.current_login_ip = '37.212.40.101'
+	# u1.slug = None
+	# db.session.commit()
+
+	# p = redis_store.get('potato')
+	# if p is None:
+	# 	redis_store.set('potato', 'XXXXX')
+	# app.logger.debug(p)
+
+	return render_template('home.html')
 
 
 
