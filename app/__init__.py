@@ -2,7 +2,7 @@
 
 from flask import Flask, request_started, session, request
 from flask_debugtoolbar import DebugToolbarExtension
-from redis import Redis
+from flask_redis import Redis
 import logging
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_mail import Mail
@@ -25,7 +25,7 @@ logging.getLogger('sqlalchemy').addHandler(log_file)
 app = Flask(__name__)
 app.config.from_object('config')
 
-redis = Redis()
+redis_store = Redis(app)
 
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
