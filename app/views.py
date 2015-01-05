@@ -14,7 +14,7 @@ from forms import BlogPostForm, UserForm, SettingsForm
 from flask.ext.security import login_required, roles_required, current_user
 from flask.ext.security.utils import verify_password, encrypt_password
 from unidecode import unidecode
-from sqlalchemy.orm import joinedload, load_only
+from sqlalchemy.orm import joinedload, load_only, undefer_group
 import random
 
 
@@ -302,7 +302,7 @@ def blog_edit_post(slug):
 # ------------ USER --------------------
 @app.route("/user/<string:slug>")
 def user_view(slug):
-	user = User.query.filter_by(slug=slug).first_or_404()
+	user = User.query.options(undefer_group('full')).filter_by(slug=slug).first_or_404()
 	g.breadcrumbs = []
 	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
 	g.breadcrumbs.append(Breadcrumb('/community', 'Community'))

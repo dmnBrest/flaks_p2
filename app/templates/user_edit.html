@@ -51,7 +51,7 @@
 			} );
 
 			function getAdressByLatLng(lat, lng) {
-				$.ajax({ url:'https://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+lng+'&sensor=false',
+				$.ajax({ url:'https://maps.googleapis.com/maps/api/geocode/json?latlng='+lat+','+lng+'&sensor=false&language=en',
 					success: function(data){
 						var arrAddress = data.results[0].address_components;
 						var address = [];
@@ -177,8 +177,6 @@
 
 					</div>
 				</div>
-
-
 
 			</div>
 		</div>
