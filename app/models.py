@@ -90,7 +90,7 @@ class User(db.Model, UserMixin):
 	def fullname(self):
 		if self.type == 'company' and self.company_name != None:
 			return self.company_name
-		elif (self.first_name is not None or self.last_name is not None):
+		elif self.first_name or self.last_name:
 			ff = (self.first_name or '')+' '+(self.last_name or '')
 			return ff.strip()
 		return self.username

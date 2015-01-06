@@ -80,7 +80,8 @@ from app import views, models
 class ExtendedRegisterForm(ConfirmRegisterForm):
 	username = StringField('Username',
 						   [validators.DataRequired(message='Username not provided'),
-							validators.Regexp('^[a-z0-9_-]{4,20}$', message='Wrong Username format')])
+							validators.Length(min=4, max=25),
+							validators.Regexp('^[a-z0-9_-]+$',  message='Wrong Username format. "a-z", "0-9", "_" and "-" characters are allowed. Min')])
 	def validate(self):
 		#check for username
 		success = True

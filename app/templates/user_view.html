@@ -22,13 +22,21 @@
 					<div class="col-md-3">
 						<img src="{{ user.get_avatar(200) }}" alt="{{ user.fullname() }} salesforce developer"/>
 					</div>
-					<div class="col-md-9">
+					<div class="col-md-9 bbox">
 						{% if user.type in ('developer', 'other') %}
 							<div class="box">
 								<h2>Personal Information</h2>
+								First name:
+								<div class="box-content">
+									{{ user.first_name or '-' }}
+								</div>
+								Last name:
+								<div class="box-content">
+									{{ user.last_name or '-' }}
+								</div>
 								Birthdate:
 								<div class="box-content">
-									{{ user.birthdate }}
+									{{ user.birthdate or '-' }}
 								</div>
 							</div>
 						{% endif %}
@@ -39,25 +47,25 @@
 								<div>
 									Work with Salesforce since:
 									<div class="box-content">
-										{{ user.sfdc_start }}
+										{{ user.sfdc_start or '-' }}
 									</div>
 								</div>
 								<div>
 									Salesforce skills:
 									<div class="box-content">
-										{{ user.sfdc_skills }}
+										{{ user.sfdc_skills or '-' }}
 									</div>
 								</div>
 								<div>
 									Salesforce certificates:
 									<div class="box-content">
-										{{ user.sfdc_certificates }}
+										{{ user.sfdc_certificates or '-' }}
 									</div>
 								</div>
 								<div>
 									Other skills:
 									<div class="box-content">
-										{{ user.other_skills }}
+										{{ user.other_skills or '-' }}
 									</div>
 								</div>
 							</div>
@@ -66,8 +74,13 @@
 						{% if user.type == 'company' %}
 							<div class="box">
 								<h2>Company information</h2>
+								Company name:
 								<div class="box-content">
-									{{ user.company_info }}
+									{{ user.company_name or '-' }}
+								</div>
+								About company:
+								<div class="box-content">
+									{{ user.company_info or '-' }}
 								</div>
 							</div>
 						{% endif %}
@@ -89,7 +102,7 @@
 							<div class="box">
 								<h2>About myself</h2>
 								<div class="box-content">
-									{{ user.about_myself }}
+									{{ user.about_myself or '-' }}
 								</div>
 							</div>
 						{% endif %}
@@ -99,7 +112,7 @@
 
 							Address:
 							<div class="box-content">
-								{{ user.geo_address }}
+								{{ user.geo_address or '-' }}
 							</div>
 
                             <script src="https://maps.googleapis.com/maps/api/js"></script>

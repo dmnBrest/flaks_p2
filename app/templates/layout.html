@@ -79,6 +79,18 @@
 				{% endif %}
 			{% endwith %}
 
+			{% if current_user.is_authenticated() and current_user.type == None %}
+				<div class="flashbox flash-warning">
+					<div class="container">
+						<div class="row">
+							<div class="col-xs-12">
+								Please select profile type in <a href="{{ url_for('user_edit', slug=current_user.slug) }}">preferences</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			{% endif %}
+
 			{% if g.breadcrumbs is defined %}
 				<div class="breadcrumbs">
 					<div class="container">
