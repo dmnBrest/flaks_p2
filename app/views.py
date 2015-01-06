@@ -350,9 +350,9 @@ def user_edit(slug):
 				user.facebook		= form.facebook.data
 				user.personal_site	= form.personal_site.data
 			elif user.type == 'company':
-				user.company_name	= form.company_name.data
 				if user.company_name != form.company_name.data:
 					user.slug = None
+				user.company_name	= form.company_name.data
 				user.company_info	= form.company_info.data
 				user.google_plus	= form.google_plus.data
 				user.linkedin		= form.linkedin.data

@@ -116,7 +116,6 @@ def before_insert_user(mapper, connection, target):
 
 @event.listens_for(User, 'before_update')
 def before_update_user(mapper, connection, target):
-	#gg = g
 	if target.slug == None:
 		target.slug = safe_slugify(User, target, target.fullname())
 	if target.geo_lat == None or target.geo_lng == None:
@@ -190,7 +189,10 @@ def before_insert_update_post(mapper, connection, target):
 	if len(parts) > 1:
 		target.body_html = bbcode_parser.format(parts[1].strip())
 	if target.slug is None:
-		target.slug = safe_slugify(Post, target, target.title)
+		ttitle = target.title
+		if ttitle.startswith('topic'):
+			ttitle = 'blog-'+ttitle
+		target.slug = safe_slugify(Post, target, ttitle)
 
 class Comment(db.Model):
 	id					= db.Column(db.Integer(), primary_key=True)
@@ -243,7 +245,7 @@ class ForumTopic(db.Model):
 def before_insert_update_forum_topic(mapper, connection, target):
 	target.body_html = bbcode_parser.format(target.body.strip())
 	if target.slug is None:
-		target.slug = safe_slugify(ForumTopic, target, target.title)
+		target.slug = safe_slugify(ForumTopic, target, 'topic-'+target.title)
 
 
 class ForumPost(db.Model):

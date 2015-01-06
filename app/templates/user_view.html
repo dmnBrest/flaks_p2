@@ -90,10 +90,29 @@
 							<div class="box">
 								<h2>Links</h2>
 								<div class="box-content">
-									{{ user.google_plus }}
-									{{ user.linkedin }}
-									{{ user.facebook }}
-									{{ user.personal_site }}
+									{% if user.google_plus %}
+										<a href="{{ user.google_plus }}" rel="nofollow" target="_blank"><img src="/static/google_plus_64.png" alt=""/></a>
+									{% else %}
+										<img src="/static/google_plus_64.png" alt="" style="opacity: 0.2;" />
+									{% endif %}
+
+									{% if user.linkedin %}
+										<a href="{{ user.linkedin }}" rel="nofollow" target="_blank"><img src="/static/linkedin_64.png" alt=""/></a>
+									{% else %}
+										<img src="/static/linkedin_64.png" alt="" style="opacity: 0.2;" />
+									{% endif %}
+
+									{% if user.facebook %}
+										<a href="{{ user.facebook }}" rel="nofollow" target="_blank"><img src="/static/facebook_64.png" alt=""/></a>
+									{% else %}
+										<img src="/static/facebook_64.png" alt="" style="opacity: 0.2;" />
+									{% endif %}
+
+									{% if user.personal_site %}
+										<a href="{{ user.personal_site }}" rel="nofollow" target="_blank"><img src="/static/personal_site_64.png" alt=""/></a>
+									{% else %}
+										<img src="/static/personal_site_64.png" alt="" style="opacity: 0.2;" />
+									{% endif %}
 								</div>
 							</div>
 						{% endif %}
