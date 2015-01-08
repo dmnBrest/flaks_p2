@@ -1,86 +1,37 @@
 {% extends "layout.html" %}
 {% block content %}
-	<script>
-		$(function(){
-			$('time').each(function(){
-				var d = $(this).attr('datetime');
-				$(this).text(moment(d).format("LLLL"));
-			});
-		})
-	</script>
 	<div class="container with-padding topic-view">
 		<div class="row">
 			<div class="col-xs-12">
-				<h1>{{ topic.title }}</h1>
-
-				<div class="topic-body">
-					<div class="row">
-						<div class="col-md-10">
-							<div class="post-header">
-								<i class="fa fa-user"></i>
-								<a href="{{ url_for('user_view', slug=topic.user.slug) }}">{{ topic.user.fullname() }}</a>
-								&nbsp;
-								<i class="fa fa-clock-o"></i>
-								<time datetime="{{ topic.created_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
-								&nbsp;
-								in
-								&nbsp;
-								<i class="fa fa-comments fa-fw"></i>
-								<a href="{{ url_for('forum_view', slug=topic.forum.slug) }}">{{ topic.forum.title }}</a>
-								&nbsp;
-								&nbsp;
-								&nbsp;
-							</div>
-							<div class="post-content">
-								{{ topic.body_html|safe }}
-							</div>
-							<div class="topic-actions">
-								{% if current_user.is_authenticated() %}
-									<span class="action-edit">
-										<a href="javascript:void(0);" class="btn btn-default btn-sm" >
-											<i class="fa fa-quote-right"></i>&nbsp;Quote
-										</a>
-									</span>
-									&nbsp;
-									{% if topic.user_id == current_user.id %}
-										<span class="action-edit">
-											<a href="javascript:void(0);" class="btn btn-default btn-sm" >
-												<i class="fa fa-pencil"></i>&nbsp;Edit
-											</a>
-										</span>
-									{% endif %}
-								{% endif %}
-							</div>
-						</div>
-						<div class="col-md-2 md-right">
-							<img class="user-avatar" src="{{  topic.user.get_avatar(150) }}" alt="{{ topic.title }} {{ topic.user.fullname() }}"/><br/>
-							<div>
-								<a href="{{ url_for('user_view', slug=topic.user.slug) }}">{{ topic.user.fullname() }}</a>
-							</div>
-						</div>
+				{% if new_topic is defined  %}
+					<h1>New Topic in {{ forum.title }}</h1>
+					<div>
+						new_topic = TRUE
 					</div>
-				</div>
-				{% for post in posts %}
-					<div class="post-item">
-						<h2>Re: {{ topic.title }}</h2>
+				{% else %}
+					<h1>{{ topic.title }}</h1>
+					<div class="topic-body">
 						<div class="row">
 							<div class="col-md-10">
 								<div class="post-header">
 									<i class="fa fa-user"></i>
-									<a href="{{ url_for('user_view', slug=post.user.slug) }}">{{ post.user.fullname() }}</a>
+									<a href="{{ url_for('user_view', slug=topic.user.slug) }}">{{ topic.user.fullname() }}</a>
 									&nbsp;
 									<i class="fa fa-clock-o"></i>
-									<time datetime="{{ post.created_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
+									<time datetime="{{ topic.created_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
 									&nbsp;
 									in
 									&nbsp;
 									<i class="fa fa-comments fa-fw"></i>
 									<a href="{{ url_for('forum_view', slug=topic.forum.slug) }}">{{ topic.forum.title }}</a>
+									&nbsp;
+									&nbsp;
+									&nbsp;
 								</div>
 								<div class="post-content">
-									{{ post.body_html|safe }}
+									{{ topic.body_html|safe }}
 								</div>
-								<div class="post-actions">
+								<div class="topic-actions">
 									{% if current_user.is_authenticated() %}
 										<span class="action-edit">
 											<a href="javascript:void(0);" class="btn btn-default btn-sm" >
@@ -88,7 +39,7 @@
 											</a>
 										</span>
 										&nbsp;
-										{% if post.user_id == current_user.id %}
+										{% if topic.user_id == current_user.id %}
 											<span class="action-edit">
 												<a href="javascript:void(0);" class="btn btn-default btn-sm" >
 													<i class="fa fa-pencil"></i>&nbsp;Edit
@@ -99,23 +50,73 @@
 								</div>
 							</div>
 							<div class="col-md-2 md-right">
-								<img class="user-avatar" src="{{  post.user.get_avatar(200) }}" alt="{{ post.title }} {{ post.user.fullname() }}"/><br/>
+								<img class="user-avatar" src="{{  topic.user.get_avatar(150) }}" alt="{{ topic.title }} {{ topic.user.fullname() }}"/><br/>
 								<div>
-									<a href="{{ url_for('user_view', slug=post.user.slug) }}">{{ post.user.fullname() }}</a>
+									<a href="{{ url_for('user_view', slug=topic.user.slug) }}">{{ topic.user.fullname() }}</a>
 								</div>
 							</div>
 						</div>
 					</div>
-				{% endfor %}
+					{% for post in posts %}
+						<div class="post-item">
+							<h2>Re: {{ topic.title }}</h2>
+							<div class="row">
+								<div class="col-md-10">
+									<div class="post-header">
+										<i class="fa fa-user"></i>
+										<a href="{{ url_for('user_view', slug=post.user.slug) }}">{{ post.user.fullname() }}</a>
+										&nbsp;
+										<i class="fa fa-clock-o"></i>
+										<time datetime="{{ post.created_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
+										&nbsp;
+										in
+										&nbsp;
+										<i class="fa fa-comments fa-fw"></i>
+										<a href="{{ url_for('forum_view', slug=topic.forum.slug) }}">{{ topic.forum.title }}</a>
+									</div>
+									<div class="post-content">
+										{{ post.body_html|safe }}
+									</div>
+									<div class="post-actions">
+										{% if current_user.is_authenticated() %}
+											<span class="action-edit">
+												<a href="javascript:void(0);" class="btn btn-default btn-sm" >
+													<i class="fa fa-quote-right"></i>&nbsp;Quote
+												</a>
+											</span>
+											&nbsp;
+											{% if post.user_id == current_user.id %}
+												<span class="action-edit">
+													<a href="javascript:void(0);" class="btn btn-default btn-sm" >
+														<i class="fa fa-pencil"></i>&nbsp;Edit
+													</a>
+												</span>
+											{% endif %}
+										{% endif %}
+									</div>
+								</div>
+								<div class="col-md-2 md-right">
+									<img class="user-avatar" src="{{  post.user.get_avatar(200) }}" alt="{{ post.title }} {{ post.user.fullname() }}"/><br/>
+									<div>
+										<a href="{{ url_for('user_view', slug=post.user.slug) }}">{{ post.user.fullname() }}</a>
+									</div>
+								</div>
+							</div>
+						</div>
+					{% endfor %}
 
-				<div class="global-actions">
-					<span class="action-edit">
-						<a href="javascript:void(0);" class="btn btn-default" >
-							<i class="fa fa-plus-square-o"></i>&nbsp;Add Reply
-						</a>
-					</span>
-				</div>
+					<div class="global-actions">
+						<span class="action-edit">
+							<a href="javascript:void(0);" class="btn btn-default btn-action" >
+								<i class="fa fa-plus-square-o"></i>&nbsp;&nbsp;Add Reply
+							</a>
+						</span>
+					</div>
 
+					<div class="new-replay-editor">
+
+					</div>
+				{% endif %}
 			</div>
 		</div>
 	</div>

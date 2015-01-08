@@ -7,3 +7,10 @@ function picsGalleryPopup(type) {
 	w.focus();
 	return w;
 }
+
+$(function(){
+	$('time').each(function(){
+		var d = $(this).attr('datetime');
+		$(this).text(moment(d).format("LLLL"));
+	});
+})

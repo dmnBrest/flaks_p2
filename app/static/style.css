@@ -128,13 +128,32 @@ font-weight: 300;}
 .home .box-4 {padding: 40px 0;}
 .home .box-4-title {font-size: 32px; font-weight: 200;}
 
+.forum-list .forum {margin-bottom: 20px;}
+.forum-list .forum-title {font-size: 25px;}
+.forum-list .forum-title a {font-weight: 300;}
+
+.forum-view .forum-actions {margin-bottom: 20px;}
+.forum-view .topic {margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 10px 15px 15px 15px; border-top: 3px solid #e0e0e0;}
+.forum-view .topic:hover {border-top: 3px solid #00B4DC;}
+
+.forum-view .topic-icon {display: inline-block; vertical-align: top; font-size: 32px;}
+.forum-view .topic-body {display: inline-block;}
+
+
+.forum-view .topic-title {font-size: 25px;}
+.forum-view .topic-title a {font-weight: 300;}
+.forum-view .topic-info, .forum-view .last-post-info {color: #808080;}
+
+
 .topic-view img.user-avatar {width: 64px; margin-bottom: 10px; margin-top: 10px;}
 @media (min-width: 992px) {.topic-view img.user-avatar {width: 150px; margin-top: 0;}}
-.topic-view .post-item, .topic-view .topic-body {margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0;}
+.topic-view .post-item, .topic-view .topic-body {margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid #e0e0e0;}
 .topic-view h2 {font-size: 20px; font-weight: 300;}
 .post-header {margin-bottom: 10px; color: #808080;}
 @media (min-width: 992px) {.topic-view .post-content {font-size: 15px;}}
 .topic-view .topic-actions, .topic-view .post-actions {margin-top: 10px;}
 .topic-view .topic-actions .btn-sm, .topic-view .post-actions .btn-sm {padding: 5px 10px;}
-.topic-view .global-actions .btn {padding: 10px 22px; background-color: #00B6DE; border: #00B6DE; color: #fff;}
-.topic-view .global-actions .btn:hover {background-color: #00c6f0; border: #00c6f0; color: #fff;}
+
+.btn.btn-action {padding: 10px 22px; background-color: #00B6DE; border: #00B6DE; color: #fff;}
+.btn.btn-action:hover {background-color: #00c6f0; border: #00c6f0; color: #fff;}
+

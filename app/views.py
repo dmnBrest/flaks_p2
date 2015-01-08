@@ -10,6 +10,7 @@ import traceback
 from werkzeug.utils import secure_filename
 import imghdr
 from models import User, Picture, Post, Meta, Forum, ForumTopic, ForumPost, Breadcrumb
+from services import ForumPostService
 from forms import BlogPostForm, UserForm, SettingsForm
 from flask.ext.security import login_required, roles_required, current_user
 from flask.ext.security.utils import verify_password, encrypt_password
@@ -44,6 +45,15 @@ def home():
 	# if p is None:
 	# 	redis_store.set('potato', 'XXXXX')
 	# app.logger.debug(p)
+
+	# p1 = None
+	# if current_user.is_authenticated():
+	# 	t1 = ForumTopic.query.first()
+	# 	p1 = ForumPost(title='p XX 1', body='Lorem ipsum dolor sit amet, consectetur adipisicing elit. ', forum_id=t1.forum.id, topic_id=t1.id, user_id=current_user.id)
+	# 	p1 = ForumPostService.CreateNewForumPost(p1)
+	#
+	# print(p1.topic.title)
+	# print(current_user.fullname())
 
 	return render_template('home.html')
 
@@ -447,7 +457,7 @@ def account_settings():
 def forum_list():
 	g.breadcrumbs = []
 	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
-	g.breadcrumbs.append(Breadcrumb('/forum', 'Forum'))
+	g.breadcrumbs.append(Breadcrumb('/forum', 'Forums'))
 	forums = Forum.query.order_by('id').all()
 	return render_template('forum_list.html', forums=forums)
 
@@ -458,12 +468,39 @@ def forum_view(slug, page=1):
 	forum = Forum.query.filter_by(slug=slug).first_or_404()
 	g.breadcrumbs = []
 	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
-	g.breadcrumbs.append(Breadcrumb('/forum', 'Forum'))
+	g.breadcrumbs.append(Breadcrumb('/forum', 'Forums'))
 	g.breadcrumbs.append(Breadcrumb('/forum/'+forum.slug, forum.title))
 	topics = ForumTopic.query.filter_by(forum_id=forum.id).\
-			order_by(ForumTopic.created_at.desc()).\
-			paginate(page, 20, True)
+					order_by(ForumTopic.created_at.desc()).\
+					paginate(page, 20, True)
 	return render_template('forum_view.html', forum=forum, topics=topics)
+
+
+@app.route('/forum/action/new-topic/<string:forum_slug>', methods=['GET'])
+@login_required
+def forum_new_topic(forum_slug):
+	forum = Forum.query.filter_by(slug=forum_slug).first_or_404()
+	g.breadcrumbs = []
+	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
+	g.breadcrumbs.append(Breadcrumb('/forum', 'Forums'))
+	g.breadcrumbs.append(Breadcrumb('/forum/'+forum.slug, forum.title))
+	g.breadcrumbs.append(Breadcrumb('', 'New Topic'))
+	topic = ForumTopic()
+	return render_template('topic_view.html', forum=forum, topic=topic, new_topic=True)
+
+
+@app.route('/forum/action/new-topic/<string:forum_slug>', methods=['POST'])
+@app.route('/forum/action/save-topic/<string:topic_slug>', methods=['POST'])
+@login_required
+def forum_save_topic(forum_slug=None, topic_slug=None):
+	pass
+
+
+@app.route('/forum/action/new-post/<string:topic_slug>', methods=['POST'])
+@app.route('/forum/action/save-post/<int:post_id>', methods=['POST'])
+@login_required
+def forum_save_post(topic_slug=None, post_id=None):
+	pass
 
 
 # ------------ COMMUNITY ----------------
@@ -507,7 +544,7 @@ def top_slug(slug):
 	if topic:
 		g.breadcrumbs = []
 		g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
-		g.breadcrumbs.append(Breadcrumb('/forum', 'Forum'))
+		g.breadcrumbs.append(Breadcrumb('/forum', 'Forums'))
 		g.breadcrumbs.append(Breadcrumb('/forum/'+topic.forum.slug, topic.forum.title))
 		g.breadcrumbs.append(Breadcrumb('', topic.title))
 		posts = ForumPost.query.filter_by(topic_id=topic.id).order_by(ForumPost.created_at.desc())

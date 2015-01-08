@@ -4,10 +4,15 @@
 		<div class="row">
 			<div class="col-xs-12">
 				<h1>Forums</h1>
-
+				<br/>
 				{% for forum in forums %}
-					<div class="forum-item">
-						<a href="{{ url_for('forum_view', slug=forum.slug) }}">{{ forum.title }}</a>
+					<div class="forum">
+						<div class="forum-title">
+							<a href="{{ url_for('forum_view', slug=forum.slug) }}"><i class="fa fa-comments"></i>&nbsp;&nbsp;{{ forum.title }}</a>
+						</div>
+						<div class="forum-info">
+
+						</div>
 					</div>
 				{% endfor %}
 

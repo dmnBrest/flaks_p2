@@ -6,11 +6,8 @@ from flask import g
 from flask.ext.security import UserMixin, RoleMixin
 from sqlalchemy.orm import MapperExtension, deferred
 from sqlalchemy import event
-from slugify import slugify
-import pygeoip
 import urllib, hashlib
 from datetime import datetime
-
 
 # -------- AUDIT ----------------
 
@@ -194,6 +191,7 @@ def before_insert_update_post(mapper, connection, target):
 			ttitle = 'blog-'+ttitle
 		target.slug = safe_slugify(Post, target, ttitle)
 
+
 class Comment(db.Model):
 	id					= db.Column(db.Integer(), primary_key=True)
 	body				= db.Column(db.Text)
@@ -208,17 +206,13 @@ class Forum(db.Model):
 	title				= db.Column(db.String(255), nullable=False)
 	description			= db.Column(db.Text)
 	total_topics		= db.Column(db.Integer)
-	last_topic_id		= db.Column(db.Integer)
+	last_post_id		= db.Column(db.Integer)
 
 	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 	created_by 			= db.Column(db.Integer())
 	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
 	updated_by 			= db.Column(db.Integer())
 	__mapper_args__ = {'extension': AuditExtension()}
-
-@event.listens_for(Forum, 'before_insert')
-def before_insert_forum(mapper, connection, target):
-	target.slug = safe_slugify(Forum, target, target.title)
 
 
 class ForumTopic(db.Model):
@@ -228,7 +222,8 @@ class ForumTopic(db.Model):
 	body				= db.Column(db.Text)
 	body_html			= db.Column(db.Text)
 	total_posts			= db.Column(db.Integer)
-	last_post_id		= db.Column(db.Integer)
+	last_post_id		= db.Column(db.Integer, db.ForeignKey('forum_post.id', use_alter=True, name='fk_topic_post_id'))
+	last_post			= db.relationship("ForumPost", foreign_keys=[last_post_id])
 	user_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
 	user 				= db.relationship("User")
 	forum_id			= db.Column(db.Integer, db.ForeignKey('forum.id'))
@@ -239,13 +234,6 @@ class ForumTopic(db.Model):
 	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
 	updated_by 			= db.Column(db.Integer())
 	__mapper_args__ = {'extension': AuditExtension()}
-
-@event.listens_for(ForumTopic, 'before_insert')
-@event.listens_for(ForumTopic, 'before_update')
-def before_insert_update_forum_topic(mapper, connection, target):
-	target.body_html = bbcode_parser.format(target.body.strip())
-	if target.slug is None:
-		target.slug = safe_slugify(ForumTopic, target, 'topic-'+target.title)
 
 
 class ForumPost(db.Model):
@@ -258,18 +246,13 @@ class ForumPost(db.Model):
 	forum_id			= db.Column(db.Integer, db.ForeignKey('forum.id'))
 	forum				= db.relationship("Forum")
 	topic_id			= db.Column(db.Integer, db.ForeignKey('forum_topic.id'))
-	topic				= db.relationship("ForumTopic")
+	topic				= db.relationship("ForumTopic", foreign_keys=[topic_id])
 
 	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 	created_by 			= db.Column(db.Integer())
 	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
 	updated_by 			= db.Column(db.Integer())
 	__mapper_args__ = {'extension': AuditExtension()}
-
-@event.listens_for(ForumPost, 'before_insert')
-@event.listens_for(ForumPost, 'before_update')
-def before_insert_update_forum_topic(mapper, connection, target):
-	target.body_html = bbcode_parser.format(target.body.strip())
 
 
 class Vote(db.Model):
@@ -292,16 +275,7 @@ class Vote(db.Model):
 
 
 # --------- Helpers ----------------------
-def safe_slugify(cls, obj, text):
-	slug = slugify(text)
-	slug_result = slug
-	i = 1
-	while True:
-		obj = db.session.query(cls).filter(cls.slug==slug_result, cls.id != obj.id).first()
-		if obj is None:
-			return slug_result
-		slug_result = slug+'_'+str(i)
-		i += 1
+from services import ipquery, safe_slugify
 
 class Meta():
 	def __init__(self, title=None, description=None, keywords=None):
@@ -310,14 +284,10 @@ class Meta():
 		self.keywords = keywords or app.config['META_KEYWORDS']
 
 class Breadcrumb():
-	 def __init__(self, url, title):
+	def __init__(self, url, title):
 		self.url = url
 		self.title = title
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-rawdata = pygeoip.GeoIP(os.path.join(basedir, '../GeoLiteCity.dat'))
-def ipquery(ip):
-	data = rawdata.record_by_name(ip)
-	return data
+
 
 

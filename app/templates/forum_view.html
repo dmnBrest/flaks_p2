@@ -5,9 +5,49 @@
 			<div class="col-xs-12">
 				<h1>{{ forum.title }}</h1>
 
+				<div class="forum-actions">
+					<span class="action-edit">
+						<a href="{{ url_for('forum_new_topic', forum_slug=forum.slug) }}" class="btn btn-default btn-action" >
+							<i class="fa fa-plus-square-o"></i>&nbsp;&nbsp;Add Topic
+						</a>
+					</span>
+				</div>
+
 				{% for topic in topics.items %}
-					<div class="topic-item">
-						<a href="{{ url_for('top_slug', slug=topic.slug) }}">{{ topic.title }}</a>
+					<div class="topic">
+						<div class="row">
+							<div class="col-md-6">
+								<div class="topic-icon">
+									<i class="fa fa-comments-o"></i>&nbsp;&nbsp;
+								</div>
+								<div class="topic-body">
+									<div class="topic-title">
+										<a href="{{ url_for('top_slug', slug=topic.slug) }}">{{ topic.title }}</a>
+									</div>
+									<div class="topic-info">
+										<i class="fa fa-user"></i>
+										<a href="{{ url_for('user_view', slug=topic.user.slug) }}">{{ topic.user.fullname() }}</a>
+										&nbsp;
+										<i class="fa fa-clock-o"></i>
+										<time datetime="{{ topic.created_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-4 md-right last-post-info">
+								{% if topic.last_post %}
+									last reply:<br/>
+									<a href="{{ url_for('top_slug', slug=topic.slug) }}#{{ topic.last_post_id }}">Re: {{ topic.title }}</a><br/>
+									by <i class="fa fa-user"></i>&nbsp;<a href="{{ url_for('user_view', slug=topic.user.slug) }}">{{ topic.last_post.user.fullname() }}</a>
+
+								{% endif %}
+							</div>
+							<div class="col-md-1">
+								<i class="fa fa-comment"></i>&nbsp;&nbsp;4
+							</div>
+							<div class="col-md-1">
+								<i class="fa fa-eye"></i>&nbsp;&nbsp;12
+							</div>
+						</div>
 					</div>
 				{% endfor %}
 

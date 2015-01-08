@@ -56,3 +56,12 @@ class SettingsForm(Form):
 	timezone				= SelectField('Timezone', choices=[(val, val) for val in pytz.common_timezones])
 	old_password			= PasswordField('Current Password', [validators.length(max=255)])
 	new_password			= PasswordField('New Password', [validators.length(max=255)])
+
+
+class ForumTopicForm(Form):
+	title	= StringField('Title', [validators.DataRequired(), validators.Length(min=8, max=255)])
+	body	= TextAreaField('About Company', [validators.length(max=2048)])
+
+
+class ForumPostForm(Form):
+	body	= TextAreaField('About Company', [validators.length(max=2048)])
