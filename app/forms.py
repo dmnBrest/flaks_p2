@@ -59,9 +59,9 @@ class SettingsForm(Form):
 
 
 class ForumTopicForm(Form):
-	title	= StringField('Title', [validators.DataRequired(), validators.Length(min=8, max=255)])
-	body	= TextAreaField('About Company', [validators.length(max=2048)])
+	title	= StringField('Title', [validators.DataRequired(), validators.Length(min=5, max=255)])
+	body	= TextAreaField('Body', [validators.length(min=4, max=2048)])
 
 
 class ForumPostForm(Form):
-	body	= TextAreaField('About Company', [validators.length(max=2048)])
+	body	= TextAreaField('Body', [validators.length(min=4, max=2048)])

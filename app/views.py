@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from app import app, db, bbcode_parser, redis_store
-from flask import request, render_template, redirect, url_for, send_from_directory, abort, flash, g
+from flask import request, render_template, redirect, url_for, send_from_directory, abort, flash, g, jsonify
 import datetime
 import os
 from PIL import Image
@@ -10,8 +10,8 @@ import traceback
 from werkzeug.utils import secure_filename
 import imghdr
 from models import User, Picture, Post, Meta, Forum, ForumTopic, ForumPost, Breadcrumb
-from services import ForumPostService
-from forms import BlogPostForm, UserForm, SettingsForm
+from services import ForumPostService, ForumTopicService
+from forms import BlogPostForm, UserForm, SettingsForm, ForumTopicForm, ForumPostForm
 from flask.ext.security import login_required, roles_required, current_user
 from flask.ext.security.utils import verify_password, encrypt_password
 from unidecode import unidecode
@@ -490,16 +490,35 @@ def forum_new_topic(forum_slug):
 
 
 @app.route('/forum/action/new-topic/<string:forum_slug>', methods=['POST'])
+@login_required
+def forum_create_topic(forum_slug=None):
+	body = request.form['body']
+	return 'ZZZZZ'
+
 @app.route('/forum/action/save-topic/<string:topic_slug>', methods=['POST'])
 @login_required
-def forum_save_topic(forum_slug=None, topic_slug=None):
-	pass
+def forum_save_topic(topic_slug):
+	topic = ForumTopic.query.filter_by(slug=topic_slug).first_or_404()
+	if topic.user_id != current_user.id:
+		abort(403)
+	r = request
+	form = ForumTopicForm(obj=request.json)
+	if form.validate():
+		topic.title = form.title.data
+		topic.body = form.body.data
+		ForumTopicService.update(topic)
+		return jsonify(status='ok', title=topic.title, body=topic.body, body_html=topic.body_html, slug=topic.slug)
+	return jsonify(status='error', errors=form.errors), 400
 
 
 @app.route('/forum/action/new-post/<string:topic_slug>', methods=['POST'])
+@login_required
+def forum_new_post(topic_slug=None):
+	pass
+
 @app.route('/forum/action/save-post/<int:post_id>', methods=['POST'])
 @login_required
-def forum_save_post(topic_slug=None, post_id=None):
+def forum_save_post(post_id=None):
 	pass
 
 
@@ -558,9 +577,13 @@ def top_slug(slug):
 @app.errorhandler(404)
 def page_not_found(e):
 	flash('Requested resource not found.', 'error')
+	if request.mimetype == 'application/json':
+		return 'Requested resource not found.', 404
 	return render_template('error.html'), 404
 
 @app.errorhandler(403)
 def no_permissions(e):
 	flash('You don\'t have the permission to access the requested resource', 'error')
+	if request.mimetype == 'application/json':
+		return 'You don\'t have the permission to access the requested resource', 403
 	return render_template('error.html'), 403

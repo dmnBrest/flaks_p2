@@ -9,8 +9,10 @@ from flask_mail import Mail
 from flask.ext.security import Security, SQLAlchemyUserDatastore
 from flask_security.forms import ConfirmRegisterForm
 from wtforms import StringField, validators
+from flask_wtf.csrf import CsrfProtect
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
+
 import bbcode
 
 
@@ -32,6 +34,8 @@ app.jinja_env.lstrip_blocks = True
 
 db = SQLAlchemy(app)
 mail = Mail(app)
+
+CsrfProtect(app)
 
 migrate = Migrate(app, db)
 manager = Manager(app)

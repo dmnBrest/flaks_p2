@@ -1,5 +1,173 @@
 {% extends "layout.html" %}
 {% block content %}
+
+	<script src="/static/jquery.color-2.1.2.min.js"></script>
+
+	<script type="text/javascript" src="/static/markitup/jquery.markitup.js"></script>
+	<link rel="stylesheet" type="text/css" href="/static/markitup/skins/simple/style.css" />
+	<link rel="stylesheet" type="text/css" href="/static/markitup/sets/bbcode/style.css" />
+	<script type="text/javascript" >
+
+		window.bbeditor_is_active = false;
+
+		mySettings = {
+			previewParserPath:	'/blog/bb/preview', // path to your BBCode parser
+			onShiftEnter:	{keepDefault:false, replaceWith:'[br /]\n'},
+			onCtrlEnter:	{keepDefault:false, openWith:'\n[p]', closeWith:'[/p]\n'},
+			onTab:			{keepDefault:false, openWith:'	'},
+			markupSet: [
+				{name:'Heading 2', key:'2', openWith:'[h2(!( class="[![Class]!]")!)]', closeWith:'[/h2]', placeHolder:'Your title here...' },
+				{name:'Heading 3', key:'3', openWith:'[h3(!( class="[![Class]!]")!)]', closeWith:'[/h3]', placeHolder:'Your title here...' },
+				{name:'Heading 4', key:'4', openWith:'[h4(!( class="[![Class]!]")!)]', closeWith:'[/h4]', placeHolder:'Your title here...' },
+				{name:'Paragraph', openWith:'[p(!( class="[![Class]!]")!)]', closeWith:'[/p]' },
+				{name:'Bold', key:'B', openWith:'[b]', closeWith:'[/b]'},
+				{name:'Italic', key:'I', openWith:'[i]', closeWith:'[/i]'},
+				{name:'Underline', key:'U', openWith:'[u]', closeWith:'[/u]'},
+				{separator:'---------------' },
+				{name:'Picture', key:'P', replaceWith:'[img][![Url]!][/img]'},
+				{name:'Link', key:'L', openWith:'[url=[![Url]!]]', closeWith:'[/url]', placeHolder:'Your text to link here...'},
+				{separator:'---------------' },
+				{name:'Size', key:'S', openWith:'[size=[![Text size]!]]', closeWith:'[/size]',
+				dropMenu :[
+					{name:'Big', openWith:'[size=200]', closeWith:'[/size]' },
+					{name:'Normal', openWith:'[size=100]', closeWith:'[/size]' },
+					{name:'Small', openWith:'[size=50]', closeWith:'[/size]' }
+				]},
+				{separator:'---------------' },
+				{name:'Bulleted list', openWith:'[list]\n', closeWith:'\n[/list]'},
+				{name:'Numeric list', openWith:'[list=[![Starting number]!]]\n', closeWith:'\n[/list]'},
+				{name:'List item', openWith:'[*] '},
+				{separator:'---------------' },
+				{name:'Quotes', openWith:'[quote]', closeWith:'[/quote]'},
+				{name:'Code', openWith:'[code]', closeWith:'[/code]'},
+				{separator:'---------------' },
+				{name:'Clean', className:"clean", replaceWith:function(markitup) { return markitup.selection.replace(/\[(.*?)\]/g, "") } },
+				{name:'Preview', className:"preview", call:'preview' }
+			]
+		};
+
+		function initBBeditor(box){
+			box.find('.markItUpMe').markItUp(mySettings);
+			box.find('.emoticons a').click(function(e) {
+				e.preventDefault();
+				emoticon = $(this).attr('title');
+				jQuery.markItUp( { replaceWith:emoticon } );
+			});
+		}
+
+		function openBBeditor(el){
+			if (window.bbeditor_is_active == true) {
+				alert('Please close other editors.');
+				return;
+			}
+			window.bbeditor_is_active = true;
+			var box = jQuery(el).parents('.item-wrapper');
+			var box_id = box.attr('id');
+
+			var bbeditor_tpl = jQuery('#bbeditor_tpl').html();
+			bbeditor_tpl = bbeditor_tpl.replace('%x1%', box.find('.item-raw').html());
+			box.find('.item-body').addClass('hidden');
+			box.find('.item-editor').append(jQuery(bbeditor_tpl)).removeClass('hidden');
+
+			if (box_id == 'topic') {
+				var topic_title = box.find('h1').addClass('hidden').text();
+				box.find('.edit-title').removeClass('hidden').find('input').val(topic_title);
+				$('html, body').animate({
+					scrollTop: $('#topic').offset().top
+				}, 500);
+			}
+
+			initBBeditor(box);
+			box.stop().css('background-color', '#f6ff00').animate({backgroundColor: '#fff'}, 1000);
+		}
+
+		function saveBBeditor(el) {
+			var box = jQuery(el).parents('.item-wrapper');
+			var box_id = box.attr('id');
+			var box_name = box.attr('name');
+			var box_editor_body =  box.find('textarea').val();
+			box.find('.edit-title').removeClass('has-error').find('.help-block').text('').addClass('hidden');
+			box.find('.bbeditor .form-group').removeClass('has-error').find('.help-block').text('').addClass('hidden');
+			if (box_id == 'topic') {
+				var box_title = box.find('.edit-title input').val();
+				$.ajax({
+					type : 'POST',
+					url : '/forum/action/save-topic/'+box_name,
+					data: JSON.stringify({ title: box_title, body: box_editor_body }),
+					contentType: 'application/json;charset=UTF-8',
+					success: function(data) {
+						if (data.status == 'ok') {
+							box.find('h1').text(data.title).removeClass('hidden');
+							box.find('.edit-title').addClass('hidden');
+							box.find('.item-content').html(data.body_html);
+							box.find('.item-raw').html(data.body);
+							cancelBBeditor(el);
+						}
+					},
+					error: function(result) {
+						if (result.status == 403) {
+							window.location.href = '/';
+						}
+						if (result.hasOwnProperty('responseJSON')) {
+							if (result.responseJSON.hasOwnProperty('errors')) {
+								if (result.responseJSON.errors.hasOwnProperty('title')) {
+									var title_err = result.responseJSON.errors.title.join(', ');
+									box.find('.edit-title').addClass('has-error').find('.help-block').text(title_err).removeClass('hidden');
+								}
+								if (result.responseJSON.errors.hasOwnProperty('body')) {
+									var body_err = result.responseJSON.errors.body.join(', ');
+									box.find('.bbeditor .form-group').addClass('has-error').find('.help-block').text(body_err).removeClass('hidden');
+								}
+							}
+						}
+					}
+				});
+			} else {
+				$.ajax({
+					type : 'POST',
+					url : '/forum/action/save-post/'+box_name,
+					data: JSON.stringify({ body: box_editor_body }),
+					contentType: 'application/json;charset=UTF-8',
+					success: function(data) {
+						if (data.status == 'ok') {
+							box.find('.item-content').html(data.body_html);
+							box.find('.item-raw').html(data.body);
+							cancelBBeditor(el);
+						}
+					},
+					error: function(result) {
+						if (result.status == 403) {
+							window.location.href = '/';
+						}
+						if (result.hasOwnProperty('responseJSON')) {
+							if (result.responseJSON.hasOwnProperty('errors')) {
+								if (result.responseJSON.errors.hasOwnProperty('body')) {
+									console.log(result.responseJSON.errors.body.join(', '));
+								}
+							}
+						}
+					}
+				});
+			}
+		}
+
+		function cancelBBeditor(el) {
+			window.bbeditor_is_active = false;
+			var box = jQuery(el).parents('.item-wrapper');
+			box.find('.item-editor').addClass('hidden').html('');
+			box.find('.item-body').removeClass('hidden');
+			box.stop().css('background-color', '#f6ff00').animate({backgroundColor: '#fff'}, 1000);
+		}
+
+		function InsertPicture(pic, type) {
+			if (type == 'editor') {
+				img_tag = '[img]/pictures/' + pic + '[/img]';
+				jQuery.markItUp({replaceWith: img_tag});
+			}
+		}
+
+	</script>
+
 	<div class="container with-padding topic-view">
 		<div class="row">
 			<div class="col-xs-12">
@@ -9,75 +177,39 @@
 						new_topic = TRUE
 					</div>
 				{% else %}
-					<h1>{{ topic.title }}</h1>
-					<div class="topic-body">
-						<div class="row">
-							<div class="col-md-10">
-								<div class="post-header">
-									<i class="fa fa-user"></i>
-									<a href="{{ url_for('user_view', slug=topic.user.slug) }}">{{ topic.user.fullname() }}</a>
-									&nbsp;
-									<i class="fa fa-clock-o"></i>
-									<time datetime="{{ topic.created_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
-									&nbsp;
-									in
-									&nbsp;
-									<i class="fa fa-comments fa-fw"></i>
-									<a href="{{ url_for('forum_view', slug=topic.forum.slug) }}">{{ topic.forum.title }}</a>
-									&nbsp;
-									&nbsp;
-									&nbsp;
-								</div>
-								<div class="post-content">
-									{{ topic.body_html|safe }}
-								</div>
-								<div class="topic-actions">
-									{% if current_user.is_authenticated() %}
-										<span class="action-edit">
-											<a href="javascript:void(0);" class="btn btn-default btn-sm" >
-												<i class="fa fa-quote-right"></i>&nbsp;Quote
-											</a>
-										</span>
-										&nbsp;
-										{% if topic.user_id == current_user.id %}
-											<span class="action-edit">
-												<a href="javascript:void(0);" class="btn btn-default btn-sm" >
-													<i class="fa fa-pencil"></i>&nbsp;Edit
-												</a>
-											</span>
-										{% endif %}
-									{% endif %}
-								</div>
+					<div class="item-wrapper" id="topic" name="{{ topic.slug }}">
+						<h1>{{ topic.title }}</h1>
+						<noindex>
+							<div class="form-group edit-title hidden">
+								<label for="title">
+									Title *:
+								</label>
+								<input class="required form-control" id="title" name="title" type="text" value="" >
+								<span class="help-block hidden"></span>
 							</div>
-							<div class="col-md-2 md-right">
-								<img class="user-avatar" src="{{  topic.user.get_avatar(150) }}" alt="{{ topic.title }} {{ topic.user.fullname() }}"/><br/>
-								<div>
-									<a href="{{ url_for('user_view', slug=topic.user.slug) }}">{{ topic.user.fullname() }}</a>
-								</div>
-							</div>
-						</div>
-					</div>
-					{% for post in posts %}
-						<div class="post-item">
-							<h2>Re: {{ topic.title }}</h2>
+						</noindex>
+						<div class="item-body">
 							<div class="row">
 								<div class="col-md-10">
-									<div class="post-header">
+									<div class="item-header">
 										<i class="fa fa-user"></i>
-										<a href="{{ url_for('user_view', slug=post.user.slug) }}">{{ post.user.fullname() }}</a>
+										<a href="{{ url_for('user_view', slug=topic.user.slug) }}">{{ topic.user.fullname() }}</a>
 										&nbsp;
 										<i class="fa fa-clock-o"></i>
-										<time datetime="{{ post.created_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
+										<time datetime="{{ topic.created_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
 										&nbsp;
 										in
 										&nbsp;
 										<i class="fa fa-comments fa-fw"></i>
 										<a href="{{ url_for('forum_view', slug=topic.forum.slug) }}">{{ topic.forum.title }}</a>
+										&nbsp;
+										&nbsp;
+										&nbsp;
 									</div>
-									<div class="post-content">
-										{{ post.body_html|safe }}
+									<div class="item-content">
+										{{ topic.body_html|safe }}
 									</div>
-									<div class="post-actions">
+									<div class="item-actions">
 										{% if current_user.is_authenticated() %}
 											<span class="action-edit">
 												<a href="javascript:void(0);" class="btn btn-default btn-sm" >
@@ -85,9 +217,9 @@
 												</a>
 											</span>
 											&nbsp;
-											{% if post.user_id == current_user.id %}
+											{% if topic.user_id == current_user.id %}
 												<span class="action-edit">
-													<a href="javascript:void(0);" class="btn btn-default btn-sm" >
+													<a href="javascript:void(0);" class="btn btn-default btn-sm" onclick="openBBeditor(this);">
 														<i class="fa fa-pencil"></i>&nbsp;Edit
 													</a>
 												</span>
@@ -96,11 +228,72 @@
 									</div>
 								</div>
 								<div class="col-md-2 md-right">
-									<img class="user-avatar" src="{{  post.user.get_avatar(200) }}" alt="{{ post.title }} {{ post.user.fullname() }}"/><br/>
+									<img class="user-avatar" src="{{  topic.user.get_avatar(150) }}" alt="{{ topic.title }} {{ topic.user.fullname() }}"/><br/>
 									<div>
-										<a href="{{ url_for('user_view', slug=post.user.slug) }}">{{ post.user.fullname() }}</a>
+										<a href="{{ url_for('user_view', slug=topic.user.slug) }}">{{ topic.user.fullname() }}</a>
 									</div>
 								</div>
+							</div>
+						</div>
+						<noindex>
+							<div class="item-raw hidden">{{ topic.body }}</div>
+						</noindex>
+						<div class="item-editor hidden">
+
+						</div>
+					</div>
+					{% for post in posts %}
+						<div class="item-wrapper" id="reply-{{ post.id }}" name="{{ post.id }}">
+							<h2>Re: {{ topic.title }}</h2>
+							<div class="item-body">
+								<div class="row">
+									<div class="col-md-10">
+										<div class="item-header">
+											<i class="fa fa-user"></i>
+											<a href="{{ url_for('user_view', slug=post.user.slug) }}">{{ post.user.fullname() }}</a>
+											&nbsp;
+											<i class="fa fa-clock-o"></i>
+											<time datetime="{{ post.created_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
+											&nbsp;
+											in
+											&nbsp;
+											<i class="fa fa-comments fa-fw"></i>
+											<a href="{{ url_for('forum_view', slug=topic.forum.slug) }}">{{ topic.forum.title }}</a>
+										</div>
+										<div class="item-content">
+											{{ post.body_html|safe }}
+										</div>
+										<div class="item-actions">
+											{% if current_user.is_authenticated() %}
+												<span class="action-edit">
+													<a href="javascript:void(0);" class="btn btn-default btn-sm" >
+														<i class="fa fa-quote-right"></i>&nbsp;Quote
+													</a>
+												</span>
+												&nbsp;
+												{% if post.user_id == current_user.id %}
+													<span class="action-edit">
+														<a href="javascript:void(0);" class="btn btn-default btn-sm" onclick="openBBeditor(this);" >
+															<i class="fa fa-pencil"></i>&nbsp;Edit
+														</a>
+													</span>
+												{% endif %}
+											{% endif %}
+										</div>
+									</div>
+									<div class="col-md-2 md-right">
+										<img class="user-avatar" src="{{  post.user.get_avatar(200) }}" alt="{{ post.title }} {{ post.user.fullname() }}"/><br/>
+										<div>
+											<a href="{{ url_for('user_view', slug=post.user.slug) }}">{{ post.user.fullname() }}</a>
+										</div>
+									</div>
+								</div>
+							</div>
+							<noindex>
+								<div class="item-raw hidden">{{ post.body }}</div>
+							</noindex>
+							<div class="item-editor hidden">
+
 							</div>
 						</div>
 					{% endfor %}
@@ -120,4 +313,38 @@
 			</div>
 		</div>
 	</div>
+
+<script id="bbeditor_tpl" type="text/template">
+<div class="bbeditor">
+	<div class="emoticons">
+		<a href="#" title=":p"><img src="/static/markitup/images/emoticon-happy.png" /></a>
+		<a href="#" title=":("><img src="/static/markitup/images/emoticon-unhappy.png" /></a>
+		<a href="#" title=":o"><img src="/static/markitup/images/emoticon-surprised.png" /></a>
+		<a href="#" title=":p"><img src="/static/markitup/images/emoticon-tongue.png" /></a>
+		<a href="#" title=";)"><img src="/static/markitup/images/emoticon-wink.png" /></a>
+		<a href="#" title=":D"><img src="/static/markitup/images/emoticon-smile.png" /></a>
+		&nbsp;&nbsp;
+		<a href="javascript:void(0);" class="btn btn-default btn-xs" onclick="picsGalleryPopup('editor');">
+			<span class="glyphicon glyphicon-picture" aria-hidden="true"></span>&nbsp;&nbsp;Gallery
+		</a>
+	</div>
+	<div class="form-group">
+		<textarea class='markItUpMe'>%x1%</textarea>
+		<span class="help-block hidden"></span>
+	</div>
+	<div class="bbeditor-actions">
+		<span class="action-save">
+			<a href="javascript:void(0);" class="btn btn-default btn-sm" onclick="saveBBeditor(this);">
+				<i class="fa fa-floppy-o"></i>&nbsp;Save
+			</a>
+		</span>
+		&nbsp;
+		<span class="action-cancel">
+			<a href="javascript:void(0);" class="btn btn-default btn-sm" onclick="cancelBBeditor(this);">
+				<i class="fa fa-times"></i>&nbsp;Cancel
+			</a>
+		</span>
+	</div>
+</div>
+</script>
 {% endblock %}

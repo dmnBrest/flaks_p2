@@ -235,6 +235,9 @@ class ForumTopic(db.Model):
 	updated_by 			= db.Column(db.Integer())
 	__mapper_args__ = {'extension': AuditExtension()}
 
+	def _asdict(self):
+		return {'slug': self.slug, 'title': self.title, 'body': self.body, 'body_html': self.body_html}
+
 
 class ForumPost(db.Model):
 	id					= db.Column(db.Integer(), primary_key=True)

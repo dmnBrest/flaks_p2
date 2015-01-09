@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-
+		<meta name="csrf-token" content="{{ csrf_token() }}">
 		<title>{{ meta.title if meta is defined else config.META_TITLE }}</title>
 		<meta name="description" content="{{ meta.description if meta is defined else config.META_DESCRIPTION }}">
 		<meta name="keywords" content="{{ meta.keywords if meta is defined else config.META_KEYWORDS }}">

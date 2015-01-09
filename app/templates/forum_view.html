@@ -36,7 +36,7 @@
 							<div class="col-md-4 md-right last-post-info">
 								{% if topic.last_post %}
 									last reply:<br/>
-									<a href="{{ url_for('top_slug', slug=topic.slug) }}#{{ topic.last_post_id }}">Re: {{ topic.title }}</a><br/>
+									<a href="{{ url_for('top_slug', slug=topic.slug) }}#reply-{{ topic.last_post_id }}">Re: {{ topic.title }}</a><br/>
 									by <i class="fa fa-user"></i>&nbsp;<a href="{{ url_for('user_view', slug=topic.user.slug) }}">{{ topic.last_post.user.fullname() }}</a>
 
 								{% endif %}
