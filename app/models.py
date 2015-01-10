@@ -178,27 +178,21 @@ class Post(db.Model):
 	updated_by 			= db.Column(db.Integer())
 	__mapper_args__ = {'extension': AuditExtension()}
 
-@event.listens_for(Post, 'before_insert')
-@event.listens_for(Post, 'before_update')
-def before_insert_update_post(mapper, connection, target):
-	parts = target.body.split("[more]")
-	target.preview_html = bbcode_parser.format(parts[0].strip())
-	if len(parts) > 1:
-		target.body_html = bbcode_parser.format(parts[1].strip())
-	if target.slug is None:
-		ttitle = target.title
-		if ttitle.startswith('topic'):
-			ttitle = 'blog-'+ttitle
-		target.slug = safe_slugify(Post, target, ttitle)
-
 
 class Comment(db.Model):
 	id					= db.Column(db.Integer(), primary_key=True)
 	body				= db.Column(db.Text)
 	body_html			= db.Column(db.Text)
+	post_id				= db.Column(db.Integer, db.ForeignKey('post.id'))
+	post 				= db.relationship("Post")
 	user_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
-	user 				= db.relationship("User")
+	user 				= db.relationship("User", backref="comments")
 
+	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+	created_by 			= db.Column(db.Integer())
+	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+	updated_by 			= db.Column(db.Integer())
+	__mapper_args__ = {'extension': AuditExtension()}
 
 class Forum(db.Model):
 	id					= db.Column(db.Integer(), primary_key=True)

@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 
+	{% if current_user.is_authenticated() %}
 	<script src="/static/jquery.color-2.1.2.min.js"></script>
 
 	<script type="text/javascript" src="/static/markitup/jquery.markitup.js"></script>
@@ -219,6 +220,7 @@
 		}
 
 	</script>
+	{% endif %}
 
 	<div class="container with-padding topic-view">
 		<div class="row">
@@ -277,6 +279,7 @@
 				{% else %}
 					<div class="item-wrapper" id="topic" name="{{ topic.slug }}">
 						<h1>{{ topic.title }}</h1>
+						{% if current_user.is_authenticated() %}
 						<noindex>
 							<div class="form-group edit-title hidden">
 								<label for="title">
@@ -286,6 +289,7 @@
 								<span class="help-block hidden"></span>
 							</div>
 						</noindex>
+						{% endif %}
 						<div class="item-body">
 							<div class="row">
 								<div class="col-md-10">
@@ -330,12 +334,14 @@
 								</div>
 							</div>
 						</div>
+						{% if current_user.is_authenticated() %}
 						<noindex>
 							<div class="item-raw hidden">{{ topic.body }}</div>
 						</noindex>
 						<div class="item-editor hidden">
 
 						</div>
+						{% endif %}
 					</div>
 					{% for post in posts %}
 						<div class="item-wrapper" id="reply-{{ post.id }}" name="{{ post.id }}">
@@ -384,15 +390,18 @@
 									</div>
 								</div>
 							</div>
+							{% if current_user.is_authenticated() %}
 							<noindex>
 								<div class="item-raw hidden">{{ post.body }}</div>
 							</noindex>
 							<div class="item-editor hidden">
 
 							</div>
+							{% endif %}
 						</div>
 					{% endfor %}
 
+					{% if current_user.is_authenticated() %}
 					<div id="new-replay-editor">
 						<div class="item-wrapper" id="new_post" name="">
 							<div class="item-body global-actions">
@@ -409,13 +418,21 @@
 							</div>
 						</div>
 					</div>
-
+					{% else %}
+						<div class="text-center">
+							<a class="join_us blue" href="{{ config['SECURITY_REGISTER_URL'] }}">
+								<span class="first">JOIN US!</span><br/>
+								<span class="second">Become part of New Community</span><br/>
+							</a>
+						</div>
+					{% endif %}
 
 				{% endif %}
 			</div>
 		</div>
 	</div>
 
+{% if current_user.is_authenticated() %}
 <script id="bbeditor_tpl" type="text/template">
 <div class="bbeditor">
 	<div class="emoticons">
@@ -452,4 +469,6 @@
 	</div>
 </div>
 </script>
+{% endif %}
+
 {% endblock %}

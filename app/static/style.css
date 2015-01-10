@@ -160,3 +160,51 @@ font-weight: 300;}
 .btn.btn-action {padding: 10px 22px; background-color: #00B6DE; border: #00B6DE; color: #fff;}
 .btn.btn-action:hover {background-color: #00c6f0; border: #00c6f0; color: #fff;}
 
+.join_us {
+	display: inline-block;
+	font: bold 16px Arial;
+	text-decoration: none;
+	margin: 20px auto;
+	padding: 16px 30px 16px 25px;
+	text-align: center;
+}
+
+.blue {
+    color: #fff;
+    background: #48C9FF;
+    background: -webkit-linear-gradient(top, #48C9FF 0%, #2EA8E5 100%);
+    background: -moz-linear-gradient(top, #48C9FF 0%, #2EA8E5 100%);
+    background: -ms-linear-gradient(top, #48C9FF 0%, #2EA8E5 100%);
+    background: -o-linear-gradient(top, #48C9FF 0%, #2EA8E5 100%);
+    background: linear-gradient(to bottom, #48C9FF 0%, #2EA8E5 100%);
+    text-shadow: #29a3cc 0 1px 3px;
+    -webkit-box-shadow:
+        inset 0 1px 0 #38bdf4,
+        inset 0 2px 0 #7bdeff,
+        0 1px 3px #777,
+        0 0px 1px #ccc;
+    -moz-box-shadow:
+        inset 0 1px 0 #38bdf4,
+        inset 0 2px 0 #7bdeff,
+        0 1px 3px #777,
+        0 0px 1px #ccc;
+    box-shadow:
+        inset 0 1px 0 #38bdf4,
+        inset 0 2px 0 #7bdeff,
+        0 1px 3px #777,
+        0 0px 1px #ccc;}
+
+.blue:hover {
+	color: #fff;
+}
+
+.blue span.first {
+	font-size: 20px;
+}
+
+.blue span.second {
+	font-size: 13px;
+	font-style: italic;
+    color: #217aa6;
+    text-shadow: #78d2f0 0 1px 0;
+}​

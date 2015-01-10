@@ -4,6 +4,46 @@ from app import app, db, bbcode_parser
 from models import User, Picture, Post, Forum, ForumTopic, ForumPost
 from slugify import slugify
 import pygeoip, os
+from datetime import datetime
+
+
+class PostService(object):
+	@classmethod
+	def insert(cls, post):
+		post = PostService._upsert(post)
+		db.session.add(post)
+		db.session.commit()
+		return post
+
+	@classmethod
+	def update(cls, post):
+		post = PostService._upsert(post)
+		db.session.add(post)
+		db.session.commit()
+		pass
+
+	@classmethod
+	def _upsert(cls, post):
+		parts = post.body.split("[more]")
+		post.preview_html = bbcode_parser.format(parts[0].strip())
+		if len(parts) > 1:
+			post.body_html = bbcode_parser.format(parts[1].strip())
+		if post.slug is None:
+			ttitle = post.title
+			if ttitle.startswith('topic'):
+				ttitle = 'blog-'+ttitle
+			post.slug = safe_slugify(Post, post, ttitle)
+		return post
+
+
+class CommentService(object):
+	@classmethod
+	def insert(cls, forum):
+		forum.slug = safe_slugify(Forum, forum, forum.title)
+		db.session.add(forum)
+		db.session.commit()
+
+
 
 class ForumService(object):
 	@classmethod

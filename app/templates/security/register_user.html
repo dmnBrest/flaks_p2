@@ -14,6 +14,11 @@
 					{% if register_user_form.password_confirm %}
 						{{ form_field(register_user_form.password_confirm, with_label=True) }}
 					{% endif %}
+					{{ register_user_form.recaptcha }}
+					{% if register_user_form.recaptcha.errors %}
+						<span class="help-block" style="color: #FF0000;">{{ register_user_form.recaptcha.errors|join(', ') }}</span>
+					{% endif %}
+					<br/>
 					{{ form_field(register_user_form.submit) }}
 				</form>
 				{% include "security/_menu.html" %}

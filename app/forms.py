@@ -52,7 +52,7 @@ class SettingsForm(Form):
 	email					= StringField('Email', [validators.Email(), validators.length(max=255)])
 	username				= StringField('Username', [validators.DataRequired(message='Username not provided'),
 														validators.Length(min=4, max=25),
-														validators.Regexp('^[a-z0-9_-]+$',  message='Wrong Username format. "a-z", "0-9", "_" and "-" characters are allowed. Min')])
+														validators.Regexp('^[a-zA-Z0-9_-]+$',  message='Wrong Username format. "a-z", "A-Z", "0-9", "_" and "-" characters are allowed. Min 4 characters.')])
 	timezone				= SelectField('Timezone', choices=[(val, val) for val in pytz.common_timezones])
 	old_password			= PasswordField('Current Password', [validators.length(max=255)])
 	new_password			= PasswordField('New Password', [validators.length(max=255)])
