@@ -485,23 +485,31 @@ def forum_new_topic(forum_slug):
 	g.breadcrumbs.append(Breadcrumb('/forum', 'Forums'))
 	g.breadcrumbs.append(Breadcrumb('/forum/'+forum.slug, forum.title))
 	g.breadcrumbs.append(Breadcrumb('', 'New Topic'))
-	topic = ForumTopic()
-	return render_template('topic_view.html', forum=forum, topic=topic, new_topic=True)
+	return render_template('topic_view.html', forum=forum, new_topic=True)
 
 
-@app.route('/forum/action/new-topic/<string:forum_slug>', methods=['POST'])
+@app.route('/forum/action/new-topic/<string:slug>', methods=['POST'])
 @login_required
-def forum_create_topic(forum_slug=None):
-	body = request.form['body']
-	return 'ZZZZZ'
+def forum_create_topic(slug):
+	forum = Forum.query.filter_by(slug=slug).first_or_404()
+	form = ForumTopicForm(obj=request.json)
+	if form.validate():
+		topic = ForumTopic()
+		topic.title = form.title.data
+		topic.body = form.body.data
+		topic.forum_id = forum.id
+		topic.user_id = current_user.id
+		ForumTopicService.insert(topic)
+		return jsonify(status='ok', title=topic.title, body=topic.body, body_html=topic.body_html, slug=topic.slug)
+	return jsonify(status='error', errors=form.errors), 400
 
-@app.route('/forum/action/save-topic/<string:topic_slug>', methods=['POST'])
+
+@app.route('/forum/action/save-topic/<string:slug>', methods=['POST'])
 @login_required
-def forum_save_topic(topic_slug):
-	topic = ForumTopic.query.filter_by(slug=topic_slug).first_or_404()
+def forum_save_topic(slug):
+	topic = ForumTopic.query.filter_by(slug=slug).first_or_404()
 	if topic.user_id != current_user.id:
 		abort(403)
-	r = request
 	form = ForumTopicForm(obj=request.json)
 	if form.validate():
 		topic.title = form.title.data
@@ -511,15 +519,33 @@ def forum_save_topic(topic_slug):
 	return jsonify(status='error', errors=form.errors), 400
 
 
-@app.route('/forum/action/new-post/<string:topic_slug>', methods=['POST'])
+@app.route('/forum/action/new-post/<string:slug>', methods=['POST'])
 @login_required
-def forum_new_post(topic_slug=None):
-	pass
+def forum_new_post(slug):
+	topic = ForumTopic.query.filter_by(slug=slug).first_or_404()
+	form = ForumPostForm(obj=request.json)
+	if form.validate():
+		post = ForumPost()
+		post.body = form.body.data
+		post.forum_id = topic.forum_id
+		post.topic_id = topic.id
+		post.user_id = current_user.id
+		ForumPostService.insert(post)
+		return jsonify(status='ok', body=post.body, body_html=post.body_html, post_id=post.id)
+	return jsonify(status='error', errors=form.errors), 400
 
 @app.route('/forum/action/save-post/<int:post_id>', methods=['POST'])
 @login_required
-def forum_save_post(post_id=None):
-	pass
+def forum_save_post(post_id):
+	post = ForumPost.query.get_or_404(post_id)
+	if post.user_id != current_user.id:
+		abort(403)
+	form = ForumPostForm(obj=request.json)
+	if form.validate():
+		post.body = form.body.data
+		ForumPostService.update(post)
+		return jsonify(status='ok', body=post.body, body_html=post.body_html)
+	return jsonify(status='error', errors=form.errors), 400
 
 
 # ------------ COMMUNITY ----------------
@@ -566,7 +592,7 @@ def top_slug(slug):
 		g.breadcrumbs.append(Breadcrumb('/forum', 'Forums'))
 		g.breadcrumbs.append(Breadcrumb('/forum/'+topic.forum.slug, topic.forum.title))
 		g.breadcrumbs.append(Breadcrumb('', topic.title))
-		posts = ForumPost.query.filter_by(topic_id=topic.id).order_by(ForumPost.created_at.desc())
+		posts = ForumPost.query.filter_by(topic_id=topic.id).order_by(ForumPost.created_at)
 		meta = Meta(title=topic.title+' | Salesforce-Developer.NET',
 				description=topic.title,
 				keywords=topic.forum.title)

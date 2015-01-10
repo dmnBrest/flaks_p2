@@ -1,19 +1,25 @@
 jQuery(function(){
-	jQuery(function(){
-		var csrftoken = $('meta[name=csrf-token]').attr('content');
-		jQuery.ajaxSetup({
-			beforeSend: function(xhr, settings) {
-				if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-					xhr.setRequestHeader("X-CSRFToken", csrftoken)
-				}
+
+	var csrftoken = $('meta[name=csrf-token]').attr('content');
+	jQuery.ajaxSetup({
+		beforeSend: function(xhr, settings) {
+			if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+				xhr.setRequestHeader("X-CSRFToken", csrftoken)
 			}
-		});
+		}
 	});
+
 	jQuery('time').each(function(){
 		var d = jQuery(this).attr('datetime');
-		jQuery(this).text(moment(d).format("LLLL"));
+		jQuery(this).text(moment(d).format("LLL"));
 	});
 });
+
+function animateScrollToHash(hash, speed, callback) {
+	$('html, body').animate({
+		scrollTop: $(hash).offset().top
+	}, speed, callback());
+}
 
 function picsGalleryPopup(type) {
 	var w = 1000;

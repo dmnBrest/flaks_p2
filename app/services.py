@@ -45,6 +45,7 @@ class ForumPostService(object):
 		topic = post.topic
 		topic.last_post_id = post.id
 		topic.total_posts = (topic.total_posts or 0) + 1
+		db.session.add(topic)
 		forum = post.forum
 		forum.last_post_id = post.id
 		db.session.add(forum)
