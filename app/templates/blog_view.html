@@ -1,5 +1,173 @@
 {% extends "layout.html" %}
 {% block content %}
+
+	{% if current_user.is_authenticated() %}
+	<script src="/static/jquery.color-2.1.2.min.js"></script>
+
+	<script type="text/javascript" src="/static/markitup/jquery.markitup.js"></script>
+	<link rel="stylesheet" type="text/css" href="/static/markitup/skins/simple/style.css" />
+	<link rel="stylesheet" type="text/css" href="/static/markitup/sets/bbcode/style.css" />
+	<script type="text/javascript" >
+
+		window.bbeditor_is_active = false;
+
+		mySettings = {
+			previewParserPath:	'/blog/bb/preview', // path to your BBCode parser
+			onShiftEnter:	{keepDefault:false, replaceWith:'[br /]\n'},
+			onCtrlEnter:	{keepDefault:false, openWith:'\n[p]', closeWith:'[/p]\n'},
+			onTab:			{keepDefault:false, openWith:'	'},
+			markupSet: [
+				{name:'Heading 2', key:'2', openWith:'[h2(!( class="[![Class]!]")!)]', closeWith:'[/h2]', placeHolder:'Your title here...' },
+				{name:'Heading 3', key:'3', openWith:'[h3(!( class="[![Class]!]")!)]', closeWith:'[/h3]', placeHolder:'Your title here...' },
+				{name:'Heading 4', key:'4', openWith:'[h4(!( class="[![Class]!]")!)]', closeWith:'[/h4]', placeHolder:'Your title here...' },
+				{name:'Paragraph', openWith:'[p(!( class="[![Class]!]")!)]', closeWith:'[/p]' },
+				{name:'Bold', key:'B', openWith:'[b]', closeWith:'[/b]'},
+				{name:'Italic', key:'I', openWith:'[i]', closeWith:'[/i]'},
+				{name:'Underline', key:'U', openWith:'[u]', closeWith:'[/u]'},
+				{separator:'---------------' },
+				{name:'Picture', key:'P', replaceWith:'[img][![Url]!][/img]'},
+				{name:'Link', key:'L', openWith:'[url=[![Url]!]]', closeWith:'[/url]', placeHolder:'Your text to link here...'},
+				{separator:'---------------' },
+				{name:'Size', key:'S', openWith:'[size=[![Text size]!]]', closeWith:'[/size]',
+				dropMenu :[
+					{name:'Big', openWith:'[size=200]', closeWith:'[/size]' },
+					{name:'Normal', openWith:'[size=100]', closeWith:'[/size]' },
+					{name:'Small', openWith:'[size=50]', closeWith:'[/size]' }
+				]},
+				{separator:'---------------' },
+				{name:'Bulleted list', openWith:'[list]\n', closeWith:'\n[/list]'},
+				{name:'Numeric list', openWith:'[list=[![Starting number]!]]\n', closeWith:'\n[/list]'},
+				{name:'List item', openWith:'[*] '},
+				{separator:'---------------' },
+				{name:'Quotes', openWith:'[quote]', closeWith:'[/quote]'},
+				{name:'Code', openWith:'[code]', closeWith:'[/code]'},
+				{separator:'---------------' },
+				{name:'Clean', className:"clean", replaceWith:function(markitup) { return markitup.selection.replace(/\[(.*?)\]/g, "") } },
+				{name:'Preview', className:"preview", call:'preview' }
+			]
+		};
+
+		function initBBeditor(box){
+			box.find('.markItUpMe').markItUp(mySettings);
+			box.find('.emoticons a').click(function(e) {
+				e.preventDefault();
+				emoticon = $(this).attr('title');
+				jQuery.markItUp( { replaceWith:emoticon } );
+			});
+		}
+
+		function openBBeditor(el){
+			if (window.bbeditor_is_active == true) {
+				alert('Please close other editors.');
+				return;
+			}
+			window.bbeditor_is_active = true;
+			var box = jQuery(el).parents('.comment');
+			var box_id = box.attr('id');
+			var bbeditor_tpl = jQuery('#bbeditor_tpl').html();
+			bbeditor_tpl = bbeditor_tpl.replace('%x1%', box.find('.comment-raw').html());
+			box.find('.comment-body, .comment-actions').addClass('hidden');
+			box.find('.comment-editor').append(jQuery(bbeditor_tpl)).removeClass('hidden');
+			initBBeditor(box);
+			box.stop().css('background-color', '#f6ff00').animate({backgroundColor: '#fff'}, 1000);
+		}
+
+		function openBBeditorForNewReply(item_id) {
+			var el = jQuery('#add_reply')[0];
+			if (window.bbeditor_is_active == false) {
+				openBBeditor(el);
+			}
+			if (item_id != null) {
+				var box = jQuery('.comment#'+item_id);
+				var item_raw = box.find('.comment-raw').html();
+				var author = box.find('.comment-author').text();
+				var quote = '[quote="'+author+'"]'+item_raw+'[/quote]';
+				animateScrollToHash('#new-comment-editor', 500, function(){
+					jQuery.markItUp( { target:'.markItUpMe', replaceWith:quote } );
+				});
+			} else {
+				animateScrollToHash('#new-comment-editor', 500, function(){});
+			}
+		}
+
+
+		function saveBBeditor(el) {
+			var box = jQuery(el).parents('.comment');
+			hideActionButtons(box);
+
+			var box_id = box.attr('id');
+			var box_name = box.attr('name');
+			var box_editor_body =  box.find('textarea').val();
+			box.find('.bbeditor .form-group').removeClass('has-error').find('.help-block').text('').addClass('hidden');
+
+			var post_url = '';
+			if (box_id == 'new_comment') {
+				post_url = '/blog/action/new-comment/{{ post.slug }}'
+			} else {
+				post_url = '/blog/action/save-comment/'+box_name
+			}
+			$.ajax({
+				type : 'POST',
+				url : post_url,
+				data: JSON.stringify({ body: box_editor_body }),
+				contentType: 'application/json;charset=UTF-8',
+				success: function(data) {
+					if (data.status == 'ok') {
+						if (box_id == 'new_comment') {
+							window.location.href = '/{{ post.slug }}?hash='+data.comment_id+'#comment-'+data.comment_id;
+						} else {
+							showActionButtons(box);
+							box.find('.comment-body').html(data.body_html);
+							box.find('.comment-raw').html(data.body);
+							cancelBBeditor(el);
+						}
+					}
+				},
+				error: function(result) {
+					showActionButtons(box);
+					if (result.status == 403 || result.status == 404) {
+						window.location.href = '/';
+					}
+					if (result.hasOwnProperty('responseJSON')) {
+						if (result.responseJSON.hasOwnProperty('errors')) {
+							if (result.responseJSON.errors.hasOwnProperty('body')) {
+								var body_err = result.responseJSON.errors.body.join(', ');
+								box.find('.bbeditor .form-group').addClass('has-error').find('.help-block').text(body_err).removeClass('hidden');
+							}
+						}
+					}
+				}
+			});
+		}
+
+		function hideActionButtons(box) {
+			box.find('.bbeditor-actions').addClass('hidden');
+			box.find('.ajax-progress').removeClass('hidden');
+		}
+		function showActionButtons(box) {
+			box.find('.bbeditor-actions').removeClass('hidden');
+			box.find('.ajax-progress').addClass('hidden');
+		}
+
+		function cancelBBeditor(el) {
+			window.bbeditor_is_active = false;
+			var box = jQuery(el).parents('.comment');
+			box.find('.comment-editor').addClass('hidden').html('');
+			box.find('.comment-body').removeClass('hidden');
+			box.stop().css('background-color', '#f6ff00').animate({backgroundColor: '#fff'}, 1000);
+		}
+
+		function InsertPicture(pic, type) {
+			if (type == 'editor') {
+				img_tag = '[img]/pictures/' + pic + '[/img]';
+				jQuery.markItUp({replaceWith: img_tag});
+			}
+		}
+
+	</script>
+	{% endif %}
+
+
 	<div class="container with-padding article-view">
 		<div class="row">
 			<div class="col-xs-12">
@@ -17,17 +185,20 @@
 							</div>
 						</div>
 						<div class="col-md-4">
-							<div class="article-actions md-right">
-								{% if post.user_id == current_user.id and current_user.has_role('editor') %}
-									<div class="post-actions">
-										<a href="{{ url_for('blog_edit_post', slug=post.slug) }}" class="btn btn-default btn-sm" >
-											Edit
-										</a>
-									</div>
-								{% endif %}
-							</div>
+
 						</div>
 					</div>
+
+					{% if post.user_id == current_user.id and current_user.has_role('editor') %}
+						<div class="article-actions">
+							<div class="post-actions">
+								<a href="{{ url_for('blog_edit_post', slug=post.slug) }}" class="btn btn-default btn-sm" >
+									Edit
+								</a>
+							</div>
+						</div>
+					{% endif %}
+
 					{% if post.thumbnail %}
 						<div class="article-thumbnail">
 							<img src="{{ post.thumbnail }}" alt=""/>
@@ -44,18 +215,106 @@
 				</article>
 
 				<div class="comments">
+					<h2>Comments:</h2>
+					{% for comment in comments %}
+						<div class="comment" id="comment-{{ comment.id }}" name="{{ comment.id }}">
+							<div class="comment-info">
+								<img class="user-avatar" style="width:48px; height:48px;" src="{{  comment.user.get_avatar(48) }}" alt="{{ comment.title }} {{ comment.user.fullname() }}"/>
+								&nbsp;
+								<a class="comment-author" href="{{ url_for('user_view', slug=comment.user.slug) }}">{{ comment.user.fullname() }}</a>
+								&nbsp;
+								<i class="fa fa-clock-o"></i>
+								<time datetime="{{ comment.created_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
 
-
-
-
-
-
-
-
+							</div>
+							<div class="comment-body">{{ comment.body_html|safe }}</div>
+							<div class="comment-actions">
+								<a href="javascript:void(0);" onclick="openBBeditorForNewReply('comment-'+{{ comment.id }})">quote</a>
+								&nbsp;&nbsp;
+								{% if current_user.id == comment.user_id %}
+									<a href="javascript:void(0);" onclick="openBBeditor(this);">edit</a>
+								{% endif %}
+							</div>
+							{% if current_user.is_authenticated() %}
+							<noindex>
+								<div class="comment-raw hidden">{{ comment.body }}</div>
+							</noindex>
+							{% endif %}
+							<div class="comment-editor hidden">
+							</div>
+						</div>
+					{% endfor %}
+					<br/>
+					{% if current_user.is_authenticated() %}
+						<div id="new-comment-editor">
+							<div class="comment" id="new_comment" name="">
+								<div class="comment-actions global-actions">
+									<span class="action-edit">
+										<a href="javascript:void(0);" class="btn btn-default btn-action" id="add_reply" onclick="openBBeditorForNewReply(null);" >
+											<i class="fa fa-plus-square-o"></i>&nbsp;&nbsp;Add Reply
+										</a>
+									</span>
+								</div>
+								<noindex>
+									<div class="comment-raw hidden"></div>
+								</noindex>
+								<div class="comment-editor hidden">
+								</div>
+							</div>
+						</div>
+					{% else %}
+						<div class="text-center">
+							<a class="join_us blue" href="{{ config['SECURITY_REGISTER_URL'] }}">
+								<span class="first">JOIN US!</span><br/>
+								<span class="second">Become part of New Community</span><br/>
+							</a>
+						</div>
+					{% endif %}
 
 				</div>
 
 			</div>
 		</div>
 	</div>
+
+
+{% if current_user.is_authenticated() %}
+<script id="bbeditor_tpl" type="text/template">
+<div class="bbeditor">
+	<div class="emoticons">
+		<a href="#" title=":p"><img src="/static/markitup/images/emoticon-happy.png" /></a>
+		<a href="#" title=":("><img src="/static/markitup/images/emoticon-unhappy.png" /></a>
+		<a href="#" title=":o"><img src="/static/markitup/images/emoticon-surprised.png" /></a>
+		<a href="#" title=":p"><img src="/static/markitup/images/emoticon-tongue.png" /></a>
+		<a href="#" title=";)"><img src="/static/markitup/images/emoticon-wink.png" /></a>
+		<a href="#" title=":D"><img src="/static/markitup/images/emoticon-smile.png" /></a>
+		&nbsp;&nbsp;
+		<a href="javascript:void(0);" class="btn btn-default btn-xs" onclick="picsGalleryPopup('editor');">
+			<span class="glyphicon glyphicon-picture" aria-hidden="true"></span>&nbsp;&nbsp;Gallery
+		</a>
+	</div>
+	<div class="form-group">
+		<textarea class='markItUpMe'>%x1%</textarea>
+		<span class="help-block hidden"></span>
+	</div>
+	<div class="bbeditor-actions">
+		<span class="action-save">
+			<a href="javascript:void(0);" class="btn btn-default btn-sm" onclick="saveBBeditor(this);">
+				<i class="fa fa-floppy-o"></i>&nbsp;Save
+			</a>
+		</span>
+		&nbsp;
+		<span class="action-cancel">
+			<a href="javascript:void(0);" class="btn btn-default btn-sm" onclick="cancelBBeditor(this);">
+				<i class="fa fa-times"></i>&nbsp;Cancel
+			</a>
+		</span>
+	</div>
+	<div class="ajax-progress hidden">
+		<img src="https://na1.salesforce.com/img/loading.gif" alt=""/>
+	</div>
+</div>
+</script>
+{% endif %}
+
 {% endblock %}

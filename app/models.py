@@ -186,7 +186,7 @@ class Comment(db.Model):
 	post_id				= db.Column(db.Integer, db.ForeignKey('post.id'))
 	post 				= db.relationship("Post")
 	user_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
-	user 				= db.relationship("User", backref="comments")
+	user 				= db.relationship("User")
 
 	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 	created_by 			= db.Column(db.Integer())

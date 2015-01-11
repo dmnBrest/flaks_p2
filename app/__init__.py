@@ -127,15 +127,6 @@ def before_request_started(app, **extra):
 
 
 
-
-
-
-
-
-
-
-
-
 '''
 bb_smiles = {
     '&gt;_&lt;': 'angry.png',

@@ -9,9 +9,9 @@ import simplejson
 import traceback
 from werkzeug.utils import secure_filename
 import imghdr
-from models import User, Picture, Post, Meta, Forum, ForumTopic, ForumPost, Breadcrumb
-from services import ForumPostService, ForumTopicService
-from forms import BlogPostForm, UserForm, SettingsForm, ForumTopicForm, ForumPostForm
+from models import User, Picture, Post, Meta, Forum, ForumTopic, ForumPost, Breadcrumb, Comment
+from services import ForumPostService, ForumTopicService, CommentService
+from forms import BlogPostForm, UserForm, SettingsForm, ForumTopicForm, ForumPostForm, CommentForm
 from flask.ext.security import login_required, roles_required, current_user
 from flask.ext.security.utils import verify_password, encrypt_password
 from unidecode import unidecode
@@ -314,6 +314,33 @@ def blog_edit_post(slug):
 			form.published.data = True
 	return render_template('blog_edit.html', form=form, post=post)
 
+# ------------ COMMENTS ----------------
+@app.route('/blog/action/new-comment/<string:slug>', methods=['POST'])
+@login_required
+def blog_new_comment(slug):
+	post = Post.query.filter_by(slug=slug).first_or_404()
+	form = CommentForm(obj=request.json)
+	if form.validate():
+		comment = Comment()
+		comment.body = form.body.data
+		comment.post_id = post.id
+		comment.user_id = current_user.id
+		CommentService.insert(comment)
+		return jsonify(status='ok', body=post.body, body_html=post.body_html, comment_id=comment.id)
+	return jsonify(status='error', errors=form.errors), 400
+
+@app.route('/blog/action/save-comment/<int:comment_id>', methods=['POST'])
+@login_required
+def blog_save_comment(comment_id):
+	comment = Comment.query.get_or_404(comment_id)
+	if comment.user_id != current_user.id:
+		abort(403)
+	form = CommentForm(obj=request.json)
+	if form.validate():
+		comment.body = form.body.data
+		CommentService.update(comment)
+		return jsonify(status='ok', body=comment.body, body_html=comment.body_html)
+	return jsonify(status='error', errors=form.errors), 400
 
 # ------------ USER --------------------
 @app.route("/user/<string:slug>")
@@ -580,11 +607,12 @@ def top_slug(slug):
 		g.breadcrumbs.append(Breadcrumb('', post.title))
 		if post.published_at is None:
 			flash('This post is not published. Only you can see it.', 'warning')
+		comments = Comment.query.filter(Comment.post_id==post.id).order_by(Comment.created_at)
 		meta = Meta(title=post.title+' | Salesforce-Developer.NET',
 				description=post.meta_description,
 				keywords=post.meta_description
 				)
-		return render_template('blog_view.html', post=post, meta=meta)
+		return render_template('blog_view.html', post=post, meta=meta, comments=comments)
 	topic = ForumTopic.query.filter(ForumTopic.slug==slug).first()
 	if topic:
 		g.breadcrumbs = []

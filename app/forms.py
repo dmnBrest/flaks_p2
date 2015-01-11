@@ -10,11 +10,14 @@ from flask_wtf.file import FileField, FileAllowed
 
 class BlogPostForm(Form):
 	title 				= StringField('Title', [validators.DataRequired(), validators.Length(min=8, max=255)])
-	body 				= TextAreaField('Body', [validators.length(min=10, max=200)])
+	body 				= TextAreaField('Body', [validators.length(min=10, max=10000)])
 	thumbnail			= StringField('Thumbnail', [validators.length(max=255)])
 	meta_keywords 		= StringField('Keywords', [validators.length(max=255)])
 	meta_description 	= StringField('Description', [validators.length(max=255)])
 	published			= BooleanField('Published')
+
+class CommentForm(Form):
+	body	= TextAreaField('Body', [validators.length(min=4, max=2048)])
 
 
 class UserForm(Form):

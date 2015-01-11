@@ -38,11 +38,17 @@ class PostService(object):
 
 class CommentService(object):
 	@classmethod
-	def insert(cls, forum):
-		forum.slug = safe_slugify(Forum, forum, forum.title)
-		db.session.add(forum)
+	def insert(cls, comment):
+		comment.body_html = bbcode_parser.format(comment.body.strip())
+		db.session.add(comment)
 		db.session.commit()
-
+		return comment
+	@classmethod
+	def update(cls, comment):
+		comment.body_html = bbcode_parser.format(comment.body.strip())
+		db.session.add(comment)
+		db.session.commit()
+		return comment
 
 
 class ForumService(object):

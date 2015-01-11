@@ -71,9 +71,9 @@
 			if (box_id == 'topic') {
 				var topic_title = box.find('h1').addClass('hidden').text();
 				box.find('.edit-title').removeClass('hidden').find('input').val(topic_title);
-				animateScrollToHash('#topic', 500);
+				animateScrollToHash('#topic', 500, function(){});
 			} else if (box_id != 'new_post') {
-				animateScrollToHash('#'+box_id, 500);
+				animateScrollToHash('#'+box_id, 500, function(){});
 			}
 			initBBeditor(box);
 			box.stop().css('background-color', '#f6ff00').animate({backgroundColor: '#fff'}, 1000);
@@ -92,6 +92,8 @@
 				animateScrollToHash('#new-replay-editor', 500, function(){
 					jQuery.markItUp( { target:'.markItUpMe', replaceWith:quote } );
 				});
+			} else {
+				animateScrollToHash('#new-comment-editor', 500, function(){});
 			}
 		}
 
