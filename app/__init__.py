@@ -120,35 +120,9 @@ def make_shell_context():
 def before_request_started(app, **extra):
 	if not request.path.startswith('/static') and \
 			not request.path.startswith('/_') and \
+			not request.path.startswith('/pictures') and \
 			not request.path.startswith('/favicon.ico') and \
 			not request.path.startswith('/auth'):
 		r = request.path
 		session['prev_url'] = request.path
 
-
-
-'''
-bb_smiles = {
-    '&gt;_&lt;': 'angry.png',
-    ':.(': 'cry.png',
-    'o_O': 'eyes.png',
-    '[]_[]': 'geek.png',
-    '8)': 'glasses.png',
-    ':D': 'lol.png',
-    ':(': 'sad.png',
-    ':O': 'shok.png',
-    '-_-': 'shy.png',
-    ':)': 'smile.png',
-    ':P': 'tongue.png',
-    ';)': 'wink.png'
-}
-
-def smile_it(str):
-	s = str
-	for smile, url in bb_smiles.items():
-		s = s.replace(smile, '<img src="%s%s%s" alt="smile" />' % (settings.STATIC_URL, PYBB_SMILES_PREFIX, url))
-	return s
-
-
-
-'''

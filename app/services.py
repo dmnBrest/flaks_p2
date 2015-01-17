@@ -4,7 +4,7 @@ from app import app, db, bbcode_parser
 from models import User, Picture, Post, Forum, ForumTopic, ForumPost
 from slugify import slugify
 import pygeoip, os
-from datetime import datetime
+import re
 
 
 class PostService(object):
@@ -25,9 +25,9 @@ class PostService(object):
 	@classmethod
 	def _upsert(cls, post):
 		parts = post.body.split("[more]")
-		post.preview_html = bbcode_parser.format(parts[0].strip())
+		post.preview_html = smile_it(bbcode_parser.format(parts[0].strip()))
 		if len(parts) > 1:
-			post.body_html = bbcode_parser.format(parts[1].strip())
+			post.body_html = smile_it(bbcode_parser.format(parts[1].strip()))
 		if post.slug is None:
 			ttitle = post.title
 			if ttitle.startswith('topic'):
@@ -39,13 +39,13 @@ class PostService(object):
 class CommentService(object):
 	@classmethod
 	def insert(cls, comment):
-		comment.body_html = bbcode_parser.format(comment.body.strip())
+		comment.body_html = smile_it(bbcode_parser.format(comment.body.strip()))
 		db.session.add(comment)
 		db.session.commit()
 		return comment
 	@classmethod
 	def update(cls, comment):
-		comment.body_html = bbcode_parser.format(comment.body.strip())
+		comment.body_html = smile_it(bbcode_parser.format(comment.body.strip()))
 		db.session.add(comment)
 		db.session.commit()
 		return comment
@@ -62,7 +62,7 @@ class ForumService(object):
 class ForumTopicService(object):
 	@classmethod
 	def insert(cls, topic):
-		topic.body_html = bbcode_parser.format(topic.body.strip())
+		topic.body_html = smile_it(bbcode_parser.format(topic.body.strip()))
 		topic.slug = safe_slugify(ForumTopic, topic, 'topic-'+topic.title)
 		db.session.add(topic)
 		db.session.commit()
@@ -74,7 +74,7 @@ class ForumTopicService(object):
 		return topic
 	@classmethod
 	def update(cls, topic):
-		topic.body_html = bbcode_parser.format(topic.body.strip())
+		topic.body_html = smile_it(bbcode_parser.format(topic.body.strip()))
 		if topic.slug is None:
 			topic.slug = safe_slugify(ForumTopic, topic, 'topic-'+topic.title)
 		db.session.add(topic)
@@ -85,7 +85,7 @@ class ForumTopicService(object):
 class ForumPostService(object):
 	@classmethod
 	def insert(cls, post):
-		post.body_html = bbcode_parser.format(post.body.strip())
+		post.body_html = smile_it(bbcode_parser.format(post.body.strip()))
 		db.session.add(post)
 		db.session.commit()
 		topic = post.topic
@@ -99,7 +99,7 @@ class ForumPostService(object):
 		return post
 	@classmethod
 	def update(cls, post):
-		post.body_html = bbcode_parser.format(post.body.strip())
+		post.body_html = smile_it(bbcode_parser.format(post.body.strip()))
 		db.session.add(post)
 		db.session.commit()
 		return post
@@ -123,3 +123,22 @@ def safe_slugify(cls, obj, text):
 			return slug_result
 		slug_result = slug+'_'+str(i)
 		i += 1
+
+bb_smiles = {
+	#'8)': 'glasses.png',
+	':D': 'emoticon-happy.png',
+	':(': 'emoticon-unhappy.png',
+	':O': 'emoticon-surprised.png',
+	':)': 'emoticon-smile.png',
+	':P': 'emoticon-tongue.png',
+	';)': 'emoticon-wink.png'
+}
+
+def smile_it(str):
+	#str = str.replace(smile, '<img src="/static/markitup/images/%s" alt="smile" />'%url)
+	for smile, name in bb_smiles.items():
+		print(smile, name)
+		str = re.sub(re.compile(re.escape(smile)+'(\s)', flags=re.IGNORECASE), '<img src="/static/markitup/images/%s" alt="smile" />\\1'%name, str)
+		str = re.sub(re.compile(re.escape(smile)+'<', flags=re.IGNORECASE), '<img src="/static/markitup/images/%s" alt="smile" /><'%name, str)
+		str = re.sub(re.compile(re.escape(smile)+'$', flags=re.IGNORECASE), '<img src="/static/markitup/images/%s" alt="smile" />'%name, str)
+	return str

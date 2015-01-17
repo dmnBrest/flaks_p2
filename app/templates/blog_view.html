@@ -153,7 +153,7 @@
 			window.bbeditor_is_active = false;
 			var box = jQuery(el).parents('.comment');
 			box.find('.comment-editor').addClass('hidden').html('');
-			box.find('.comment-body').removeClass('hidden');
+			box.find('.comment-body, .comment-actions').removeClass('hidden');
 			box.stop().css('background-color', '#f6ff00').animate({backgroundColor: '#fff'}, 1000);
 		}
 
@@ -244,14 +244,13 @@
 							</div>
 						</div>
 					{% endfor %}
-					<br/>
 					{% if current_user.is_authenticated() %}
 						<div id="new-comment-editor">
-							<div class="comment" id="new_comment" name="">
+							<div class="comment remove-border" id="new_comment" name="">
 								<div class="comment-actions global-actions">
 									<span class="action-edit">
 										<a href="javascript:void(0);" class="btn btn-default btn-action" id="add_reply" onclick="openBBeditorForNewReply(null);" >
-											<i class="fa fa-plus-square-o"></i>&nbsp;&nbsp;Add Reply
+											<i class="fa fa-plus-square-o"></i>&nbsp;&nbsp;Add Comment
 										</a>
 									</span>
 								</div>
@@ -282,12 +281,12 @@
 <script id="bbeditor_tpl" type="text/template">
 <div class="bbeditor">
 	<div class="emoticons">
-		<a href="#" title=":p"><img src="/static/markitup/images/emoticon-happy.png" /></a>
-		<a href="#" title=":("><img src="/static/markitup/images/emoticon-unhappy.png" /></a>
-		<a href="#" title=":o"><img src="/static/markitup/images/emoticon-surprised.png" /></a>
-		<a href="#" title=":p"><img src="/static/markitup/images/emoticon-tongue.png" /></a>
-		<a href="#" title=";)"><img src="/static/markitup/images/emoticon-wink.png" /></a>
-		<a href="#" title=":D"><img src="/static/markitup/images/emoticon-smile.png" /></a>
+		<a href="#" title=":) "><img src="/static/markitup/images/emoticon-smile.png" /></a>
+		<a href="#" title=":D "><img src="/static/markitup/images/emoticon-happy.png" /></a>
+		<a href="#" title=":( "><img src="/static/markitup/images/emoticon-unhappy.png" /></a>
+		<a href="#" title=":O "><img src="/static/markitup/images/emoticon-surprised.png" /></a>
+		<a href="#" title=":P "><img src="/static/markitup/images/emoticon-tongue.png" /></a>
+		<a href="#" title=";) "><img src="/static/markitup/images/emoticon-wink.png" /></a>
 		&nbsp;&nbsp;
 		<a href="javascript:void(0);" class="btn btn-default btn-xs" onclick="picsGalleryPopup('editor');">
 			<span class="glyphicon glyphicon-picture" aria-hidden="true"></span>&nbsp;&nbsp;Gallery
