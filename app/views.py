@@ -167,17 +167,18 @@ def create_thumbnail(image, basewidth):
 		return False
 
 # -------------- GET PICTURE for DEV SERVER ----------
-@app.route("/pictures/<string:filename>", methods=['GET'])
-def get_picture(filename):
-	return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER']), filename=secure_filename(filename))
+if app.config['DEBUG'] == True:
+	@app.route("/pictures/<string:filename>", methods=['GET'])
+	def get_picture(filename):
+		return send_from_directory(os.path.join(app.config['UPLOAD_FOLDER']), filename=secure_filename(filename))
 
-@app.route("/pictures/thumbs/<string:filename>", methods=['GET'])
-def get_thumbnail(filename):
-	return send_from_directory(os.path.join(app.config['THUMBNAIL_FOLDER']), filename=secure_filename(filename))
+	@app.route("/pictures/thumbs/<string:filename>", methods=['GET'])
+	def get_thumbnail(filename):
+		return send_from_directory(os.path.join(app.config['THUMBNAIL_FOLDER']), filename=secure_filename(filename))
 
-@app.route("/pictures/avatars/<string:filename>", methods=['GET'])
-def get_avatars(filename):
-	return send_from_directory(os.path.join(app.config['AVATAR_FOLDER']), filename=secure_filename(filename))
+	@app.route("/pictures/avatars/<string:filename>", methods=['GET'])
+	def get_avatars(filename):
+		return send_from_directory(os.path.join(app.config['AVATAR_FOLDER']), filename=secure_filename(filename))
 
 # ------------- EDITOR -------------------------------
 @app.route("/blog")

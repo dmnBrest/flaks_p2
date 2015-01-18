@@ -137,7 +137,6 @@ bb_smiles = {
 def smile_it(str):
 	#str = str.replace(smile, '<img src="/static/markitup/images/%s" alt="smile" />'%url)
 	for smile, name in bb_smiles.items():
-		print(smile, name)
 		str = re.sub(re.compile(re.escape(smile)+'(\s)', flags=re.IGNORECASE), '<img src="/static/markitup/images/%s" alt="smile" />\\1'%name, str)
 		str = re.sub(re.compile(re.escape(smile)+'<', flags=re.IGNORECASE), '<img src="/static/markitup/images/%s" alt="smile" /><'%name, str)
 		str = re.sub(re.compile(re.escape(smile)+'$', flags=re.IGNORECASE), '<img src="/static/markitup/images/%s" alt="smile" />'%name, str)

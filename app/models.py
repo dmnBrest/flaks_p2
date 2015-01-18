@@ -45,7 +45,7 @@ class User(db.Model, UserMixin):
 	email 				= db.Column(db.String(255), unique=True)
 	first_name			= db.Column(db.String(255))
 	last_name			= db.Column(db.String(255))
-	type				= db.Column(db.Enum('developer', 'company', 'other'))
+	type				= db.Column(db.Enum('developer', 'company', 'other', name='type'))
 	birthdate			= deferred(db.Column(db.Date), group='full')
 	gravatar			= db.Column(db.Boolean)
 	avatar_link			= db.Column(db.String(255))
@@ -261,7 +261,7 @@ class Vote(db.Model):
 	forum_post			= db.relationship("ForumPost")
 	comment_id			= db.Column(db.Integer, db.ForeignKey('comment.id'))
 	comment 			= db.relationship("Comment")
-	type				= db.Column(db.Enum('+1','-1'))
+	type				= db.Column(db.Enum('+1','-1', name='type'))
 
 	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 	created_by 			= db.Column(db.Integer())
