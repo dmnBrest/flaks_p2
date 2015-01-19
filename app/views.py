@@ -63,7 +63,7 @@ def home():
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 IGNORED_FILES = set(['.gitignore'])
 
-@app.route('/pictures', methods=['GET', 'POST'])
+@app.route('/upload', methods=['GET', 'POST'])
 @roles_required('editor')
 def pictures():
 	if request.method == 'POST':
