@@ -10,7 +10,7 @@
 					</div>
 					<div class="col-md-4">
 						{% if current_user.is_authenticated() and user.id == current_user.id %}
-						<div class="article-actions md-right">
+						<div class="article-actions text-right">
 							<a href="{{ url_for('user_edit', slug=user.slug) }}" class="btn btn-default btn-sm">Edit</a>
 							<a href="{{ url_for('account_settings') }}" class="btn btn-default btn-sm">Account Settings</a>
 						</div>
