@@ -10,7 +10,7 @@ import traceback
 from werkzeug.utils import secure_filename
 import imghdr
 from models import User, Picture, Post, Meta, Forum, ForumTopic, ForumPost, Breadcrumb, Comment
-from services import ForumPostService, ForumTopicService, CommentService
+from services import ForumPostService, ForumTopicService, CommentService, PostService
 from forms import BlogPostForm, UserForm, SettingsForm, ForumTopicForm, ForumPostForm, CommentForm
 from flask.ext.security import login_required, roles_required, current_user
 from flask.ext.security.utils import verify_password, encrypt_password
@@ -263,8 +263,7 @@ def blog_new_post():
 			post.meta_description = form.meta_description.data
 			post.thumbnail = form.thumbnail.data
 			post.user_id = current_user.id
-			db.session.add(post)
-			db.session.commit()
+			PostService.isert(post)
 			flash('Post created successfully. You can continue editing or return to Article List.', 'success')
 			return redirect(url_for('blog_edit_post', slug=post.slug))
 		else:
@@ -301,7 +300,7 @@ def blog_edit_post(slug):
 				post.published_at = datetime.datetime.now()
 			if form.published.data == False and post.published_at != None:
 				post.published_at = None
-			db.session.commit()
+			PostService.update(post)
 			if request.form['submit'] == 'Save & Exit':
 				flash('Post updated successfully.', 'success')
 				return redirect(url_for('top_slug', slug=post.slug))

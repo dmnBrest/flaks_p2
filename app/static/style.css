@@ -124,8 +124,9 @@ font-weight: 300;}
 .home .box-1-1 a:hover {color: #000; background-color: #fff;}
 
 .home .box-2 {padding: 40px 0 60px 0;}
-.home .box-2 .box-2-title {margin-bottom: 24px;}
-.home .box-2 .box-2-title a {font-size: 34px; font-weight: 300;}
+.home .box-2-title {margin-bottom: 24px;}
+.home .box-2-title a {font-size: 34px; font-weight: 300;}
+.home .box-2-content {font-size: 15px;}
 .home .box-2 img {width: 196px;}
 
 .home .box-3 {min-height: 450px; padding: 40px 0; background: url('/static/faces.jpg') no-repeat top center;}

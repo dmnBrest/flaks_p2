@@ -45,7 +45,7 @@ class User(db.Model, UserMixin):
 	email 				= db.Column(db.String(255), unique=True)
 	first_name			= db.Column(db.String(255))
 	last_name			= db.Column(db.String(255))
-	type				= db.Column(db.Enum('developer', 'company', 'other', name='type'))
+	type				= db.Column(db.String(255))  # 'developer', 'company', 'other'
 	birthdate			= deferred(db.Column(db.Date), group='full')
 	gravatar			= db.Column(db.Boolean)
 	avatar_link			= db.Column(db.String(255))
@@ -158,7 +158,7 @@ def before_delete_picture(mapper, connection, target):
 
 # --------- POST ----------------------
 class Post(db.Model):
-	id					= db.Column(db.Integer(), primary_key=True)
+	id					= db.Column(db.Integer, primary_key=True)
 	slug				= db.Column(db.String(255), unique=True, nullable=False)
 	title				= db.Column(db.String(255), nullable=False)
 	thumbnail			= db.Column(db.String(255))
@@ -171,31 +171,62 @@ class Post(db.Model):
 	user_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
 	user 				= db.relationship("User")
 	published_at 		= db.Column(db.DateTime)
+	version				= db.Column(db.Integer)
 
 	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-	created_by 			= db.Column(db.Integer())
+	created_by 			= db.Column(db.Integer)
 	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
-	updated_by 			= db.Column(db.Integer())
+	updated_by 			= db.Column(db.Integer)
+	__mapper_args__ = {'extension': AuditExtension()}
+
+class PostHistory(db.Model):
+	id					= db.Column(db.Integer, primary_key=True)
+	title				= db.Column(db.String(255), nullable=False)
+	body				= db.Column(db.Text)
+	meta_keywords		= db.Column(db.Text)
+	meta_description	= db.Column(db.Text)
+	version				= db.Column(db.Integer)
+	post_id				= db.Column(db.Integer, db.ForeignKey('post.id'))
+	post 				= db.relationship("Post")
+
+	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+	created_by 			= db.Column(db.Integer)
+	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+	updated_by 			= db.Column(db.Integer)
 	__mapper_args__ = {'extension': AuditExtension()}
 
 
 class Comment(db.Model):
-	id					= db.Column(db.Integer(), primary_key=True)
+	id					= db.Column(db.Integer, primary_key=True)
 	body				= db.Column(db.Text)
 	body_html			= db.Column(db.Text)
 	post_id				= db.Column(db.Integer, db.ForeignKey('post.id'))
 	post 				= db.relationship("Post")
 	user_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
 	user 				= db.relationship("User")
+	version				= db.Column(db.Integer)
 
 	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-	created_by 			= db.Column(db.Integer())
+	created_by 			= db.Column(db.Integer)
 	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
-	updated_by 			= db.Column(db.Integer())
+	updated_by 			= db.Column(db.Integer)
+	__mapper_args__ = {'extension': AuditExtension()}
+
+class CommentHistory(db.Model):
+	id					= db.Column(db.Integer, primary_key=True)
+	body				= db.Column(db.Text)
+	version				= db.Column(db.Integer)
+	comment_id			= db.Column(db.Integer, db.ForeignKey('comment.id'))
+	comment 			= db.relationship("Comment")
+
+	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+	created_by 			= db.Column(db.Integer)
+	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+	updated_by 			= db.Column(db.Integer)
 	__mapper_args__ = {'extension': AuditExtension()}
 
 class Forum(db.Model):
-	id					= db.Column(db.Integer(), primary_key=True)
+	id					= db.Column(db.Integer, primary_key=True)
 	slug				= db.Column(db.String(255), unique=True, nullable=False)
 	title				= db.Column(db.String(255), nullable=False)
 	description			= db.Column(db.Text)
@@ -203,14 +234,14 @@ class Forum(db.Model):
 	last_post_id		= db.Column(db.Integer)
 
 	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-	created_by 			= db.Column(db.Integer())
+	created_by 			= db.Column(db.Integer)
 	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
-	updated_by 			= db.Column(db.Integer())
+	updated_by 			= db.Column(db.Integer)
 	__mapper_args__ = {'extension': AuditExtension()}
 
 
 class ForumTopic(db.Model):
-	id					= db.Column(db.Integer(), primary_key=True)
+	id					= db.Column(db.Integer, primary_key=True)
 	slug				= db.Column(db.String(255), unique=True, nullable=False)
 	title				= db.Column(db.String(255), nullable=False)
 	body				= db.Column(db.Text)
@@ -222,19 +253,31 @@ class ForumTopic(db.Model):
 	user 				= db.relationship("User")
 	forum_id			= db.Column(db.Integer, db.ForeignKey('forum.id'))
 	forum 				= db.relationship("Forum")
+	version				= db.Column(db.Integer)
 
 	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-	created_by 			= db.Column(db.Integer())
+	created_by 			= db.Column(db.Integer)
 	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
-	updated_by 			= db.Column(db.Integer())
+	updated_by 			= db.Column(db.Integer)
 	__mapper_args__ = {'extension': AuditExtension()}
 
-	def _asdict(self):
-		return {'slug': self.slug, 'title': self.title, 'body': self.body, 'body_html': self.body_html}
 
+class ForumTopicHistory(db.Model):
+	id					= db.Column(db.Integer, primary_key=True)
+	title				= db.Column(db.String(255), nullable=False)
+	body				= db.Column(db.Text)
+	forum_topic_id		= db.Column(db.Integer, db.ForeignKey('forum_topic.id'))
+	forum_topic 		= db.relationship("ForumTopic")
+	version				= db.Column(db.Integer)
+
+	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+	created_by 			= db.Column(db.Integer)
+	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+	updated_by 			= db.Column(db.Integer)
+	__mapper_args__ = {'extension': AuditExtension()}
 
 class ForumPost(db.Model):
-	id					= db.Column(db.Integer(), primary_key=True)
+	id					= db.Column(db.Integer, primary_key=True)
 	body				= db.Column(db.Text)
 	body_html			= db.Column(db.Text)
 	user_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -243,16 +286,31 @@ class ForumPost(db.Model):
 	forum				= db.relationship("Forum")
 	topic_id			= db.Column(db.Integer, db.ForeignKey('forum_topic.id'))
 	topic				= db.relationship("ForumTopic", foreign_keys=[topic_id])
+	version				= db.Column(db.Integer)
 
 	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-	created_by 			= db.Column(db.Integer())
+	created_by 			= db.Column(db.Integer)
 	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
-	updated_by 			= db.Column(db.Integer())
+	updated_by 			= db.Column(db.Integer)
+	__mapper_args__ = {'extension': AuditExtension()}
+
+
+class ForumPostHistory(db.Model):
+	id					= db.Column(db.Integer, primary_key=True)
+	body				= db.Column(db.Text)
+	forum_post_id		= db.Column(db.Integer, db.ForeignKey('forum_post.id'))
+	forum_post 			= db.relationship("ForumPost")
+	version				= db.Column(db.Integer)
+
+	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+	created_by 			= db.Column(db.Integer)
+	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+	updated_by 			= db.Column(db.Integer)
 	__mapper_args__ = {'extension': AuditExtension()}
 
 
 class Vote(db.Model):
-	id					= db.Column(db.Integer(), primary_key=True)
+	id					= db.Column(db.Integer, primary_key=True)
 	user_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
 	user 				= db.relationship("User")
 	forum_topic_id		= db.Column(db.Integer, db.ForeignKey('forum_topic.id'))
@@ -261,12 +319,30 @@ class Vote(db.Model):
 	forum_post			= db.relationship("ForumPost")
 	comment_id			= db.Column(db.Integer, db.ForeignKey('comment.id'))
 	comment 			= db.relationship("Comment")
-	type				= db.Column(db.Enum('+1','-1', name='type'))
+	type				= db.Column(db.String(255))           # '+1','-1'
 
 	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
-	created_by 			= db.Column(db.Integer())
+	created_by 			= db.Column(db.Integer)
 	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
-	updated_by 			= db.Column(db.Integer())
+	updated_by 			= db.Column(db.Integer)
+	__mapper_args__ = {'extension': AuditExtension()}
+
+
+class Message(db.Model):
+	id					= db.Column(db.Integer, primary_key=True)
+	body				= db.Column(db.Text)
+	body_html			= db.Column(db.Text)
+	parent_id			= db.Column(db.Integer, db.ForeignKey('message.id'))
+	parent				= db.relationship("Message")
+	from_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
+	form 				= db.relationship("User", foreign_keys=[from_id])
+	to_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
+	to	 				= db.relationship("User", foreign_keys=[to_id])
+
+	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+	created_by 			= db.Column(db.Integer)
+	updated_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False, onupdate=datetime.utcnow)
+	updated_by 			= db.Column(db.Integer)
 	__mapper_args__ = {'extension': AuditExtension()}
 
 
