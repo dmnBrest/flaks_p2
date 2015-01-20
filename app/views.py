@@ -263,7 +263,7 @@ def blog_new_post():
 			post.meta_description = form.meta_description.data
 			post.thumbnail = form.thumbnail.data
 			post.user_id = current_user.id
-			PostService.isert(post)
+			PostService.insert(post)
 			flash('Post created successfully. You can continue editing or return to Article List.', 'success')
 			return redirect(url_for('blog_edit_post', slug=post.slug))
 		else:
