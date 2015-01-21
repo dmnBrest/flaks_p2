@@ -118,7 +118,7 @@ article .article-actions {margin-top: 10px;}
 .account-settings .box {border-top: 2px solid #00B4DC; margin-top: 30px;}
 
 .home .box-1 {background: url('/static/bg1.jpg') no-repeat top center; background-size: cover;}
-.home .box-1-1 {height: 400px; background-color: rgba(0,0,0, 0.4); text-align: center; padding-top: 50px;}
+.home .box-1-1 {height: 400px; /* background-color: rgba(0,0,0, 0.4); */ text-align: center; padding-top: 50px;}
 .home .box-1-1 p {font-size: 36px; color: #fff; font-weight: 200;}
 .home .box-1-1 a {display: inline-block; padding: 6px 15px; border: 1px solid #fff; color: #fff; font-size: 17px;
 font-weight: 300;}
@@ -130,7 +130,7 @@ font-weight: 300;}
 .home .box-2-content {font-size: 15px;}
 .home .box-2 img {width: 196px;}
 
-.home .box-3 {min-height: 450px; padding: 40px 0; background: url('/static/faces.jpg') no-repeat top center;}
+.home .box-3 {min-height: 450px; padding: 40px 0; background: url('/static/faces2.jpg') no-repeat top center;}
 .home .box-3-title {margin-top: 30px; font-size: 34px; font-weight: 200; color: #fff;}
 .home .box-3-img img {margin: 20px 0; width: 64px;}
 .home .box-3-content {margin-top: 20px; margin-bottom: 30px; color: #fff; font-size: 19px; font-weight: 200;}
