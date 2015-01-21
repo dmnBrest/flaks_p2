@@ -50,7 +50,7 @@ bbcode_parser.add_simple_formatter('h4', '<h4>%(value)s</h4>', swallow_trailing_
 bbcode_parser.add_simple_formatter('p', '<p>%(value)s</p>', swallow_trailing_newline=True)
 bbcode_parser.add_simple_formatter('br', '<br />', standalone=True)
 bbcode_parser.add_simple_formatter('img', '<span class="article-img"><img src="%(value)s"></span>', replace_links=False, swallow_trailing_newline=True)
-bbcode_parser.add_simple_formatter('code', '<pre><code>%(value)s</code></pre>', render_embedded=False, transform_newlines=False, swallow_trailing_newline=True)
+bbcode_parser.add_simple_formatter('code', '<pre class="prettyprint linenums"><code>%(value)s</code></pre>', render_embedded=False, transform_newlines=False, swallow_trailing_newline=True)
 
 def render_quote(tag_name, value, options, parent, context):
 	author = u''
