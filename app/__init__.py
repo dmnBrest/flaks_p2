@@ -34,19 +34,12 @@ manager.add_command('db', MigrateCommand)
 
 
 # ----------- LOGGER ----------------------
-# logging.basicConfig() #filename='appx.log'
-#logging.getLogger('werkzeug').setLevel(logging.WARNING)
-#logging.getLogger('sqlalchemy').setLevel(logging.INFO)
-#log_file = logging.FileHandler(filename='appx.log')
-#logging.getLogger('werkzeug').addHandler(log_file)
-#logging.getLogger('sqlalchemy').addHandler(log_file)
-ADMINS = ['dmitry.shnyrev@gmail.com']
 if not app.debug:
 	import logging
 	from logging.handlers import SMTPHandler
 	mail_handler = SMTPHandler(mailhost=(app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
 								fromaddr='server-error@salesforce-developer.net',
-								toaddrs=ADMINS,
+								toaddrs=app.config['ADMINS_MAILS'],
 								subject='Salesforce-Developer.NET Failed',
 								credentials=(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD']),
 								secure=()
