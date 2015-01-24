@@ -19,11 +19,11 @@ import bbcode
 
 # ----------- LOGGER ----------------------
 # logging.basicConfig() #filename='appx.log'
-logging.getLogger('werkzeug').setLevel(logging.WARNING)
-logging.getLogger('sqlalchemy').setLevel(logging.INFO)
-log_file = logging.FileHandler(filename='appx.log')
-logging.getLogger('werkzeug').addHandler(log_file)
-logging.getLogger('sqlalchemy').addHandler(log_file)
+#logging.getLogger('werkzeug').setLevel(logging.WARNING)
+#logging.getLogger('sqlalchemy').setLevel(logging.INFO)
+#log_file = logging.FileHandler(filename='appx.log')
+#logging.getLogger('werkzeug').addHandler(log_file)
+#logging.getLogger('sqlalchemy').addHandler(log_file)
 
 app = Flask(__name__)
 app.config.from_object('config')
