@@ -23,39 +23,18 @@ from flask.ext.mail import Message
 @app.route('/')
 #@login_required
 def home():
-	#request.form['username']
-	#flash('DOOM FLASH!!!!', 'info')
-	#flash('DOOM FLASH!!!!', 'error')
-	#flash('DOOM FLASH!!!!', 'success')
 
-	msg = Message("Hello from SFDEV.net", recipients=["dmitry.shnyrev@gmail.com"])
-	msg.body = "testing from Home"
-	msg.html = "<b>testing from Home</b>"
-	mail.send(msg)
-
-	# u1 = User.query.first()
-	# u1.first_name = 'f1'
-	# u1.last_name = 'l1'
-	# u1.current_login_ip = '37.212.40.101'
-	# u1.slug = None
-	# db.session.commit()
+	# msg = Message("Hello from SFDEV.net", recipients=["dmitry.shnyrev@gmail.com"])
+	# msg.body = "testing from Home"
+	# msg.html = "<b>testing from Home</b>"
+	# mail.send(msg)
 
 	# p = redis_store.get('potato')
 	# if p is None:
 	# 	redis_store.set('potato', 'XXXXX')
 	# app.logger.debug(p)
 
-	# p1 = None
-	# if current_user.is_authenticated():
-	# 	t1 = ForumTopic.query.first()
-	# 	p1 = ForumPost(title='p XX 1', body='Lorem ipsum dolor sit amet, consectetur adipisicing elit. ', forum_id=t1.forum.id, topic_id=t1.id, user_id=current_user.id)
-	# 	p1 = ForumPostService.CreateNewForumPost(p1)
-	#
-	# print(p1.topic.title)
-	# print(current_user.fullname())
-
 	return render_template('home.html')
-
 
 
 # ------------- PICTURES ------------------
