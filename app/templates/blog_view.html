@@ -2,14 +2,188 @@
 {% block content %}
 
 	{% if current_user.is_authenticated() %}
-	<script src="/static/jquery.color-2.1.2.min.js"></script>
+		<script src="/static/jquery.color-2.1.2.min.js"></script>
 
-	<script type="text/javascript" src="/static/markitup/jquery.markitup.js"></script>
-	<link rel="stylesheet" type="text/css" href="/static/markitup/skins/simple/style.css" />
-	<link rel="stylesheet" type="text/css" href="/static/markitup/sets/bbcode/style.css" />
+		<script type="text/javascript" src="/static/markitup/jquery.markitup.js"></script>
+		<link rel="stylesheet" type="text/css" href="/static/markitup/skins/simple/style.css" />
+		<link rel="stylesheet" type="text/css" href="/static/markitup/sets/bbcode/style.css" />
 
-	<link rel="stylesheet" href="/static/fancybox/source/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
-	<script type="text/javascript" src="/static/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+		<link rel="stylesheet" href="/static/fancybox/source/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+		<script type="text/javascript" src="/static/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+		<script type="text/javascript" >
+
+			window.bbeditor_is_active = false;
+
+			mySettings = {
+				previewParserPath:	'/blog/bb/preview', // path to your BBCode parser
+				onShiftEnter:	{keepDefault:false, replaceWith:'[br /]\n'},
+				onCtrlEnter:	{keepDefault:false, openWith:'\n[p]', closeWith:'[/p]\n'},
+				onTab:			{keepDefault:false, openWith:'	'},
+				markupSet: [
+					{name:'Heading 2', key:'2', openWith:'[h2(!( class="[![Class]!]")!)]', closeWith:'[/h2]', placeHolder:'Your title here...' },
+					{name:'Heading 3', key:'3', openWith:'[h3(!( class="[![Class]!]")!)]', closeWith:'[/h3]', placeHolder:'Your title here...' },
+					{name:'Heading 4', key:'4', openWith:'[h4(!( class="[![Class]!]")!)]', closeWith:'[/h4]', placeHolder:'Your title here...' },
+					{name:'Paragraph', openWith:'[p(!( class="[![Class]!]")!)]', closeWith:'[/p]' },
+					{name:'Bold', key:'B', openWith:'[b]', closeWith:'[/b]'},
+					{name:'Italic', key:'I', openWith:'[i]', closeWith:'[/i]'},
+					{name:'Underline', key:'U', openWith:'[u]', closeWith:'[/u]'},
+					{separator:'---------------' },
+					{name:'Picture', key:'P', replaceWith:'[img][![Url]!][/img]'},
+					{name:'Link', key:'L', openWith:'[url=[![Url]!]]', closeWith:'[/url]', placeHolder:'Your text to link here...'},
+					{separator:'---------------' },
+					{name:'Size', key:'S', openWith:'[size=[![Text size]!]]', closeWith:'[/size]',
+					dropMenu :[
+						{name:'Big', openWith:'[size=200]', closeWith:'[/size]' },
+						{name:'Normal', openWith:'[size=100]', closeWith:'[/size]' },
+						{name:'Small', openWith:'[size=50]', closeWith:'[/size]' }
+					]},
+					{separator:'---------------' },
+					{name:'Bulleted list', openWith:'[list]\n', closeWith:'\n[/list]'},
+					{name:'Numeric list', openWith:'[list=[![Starting number]!]]\n', closeWith:'\n[/list]'},
+					{name:'List item', openWith:'[*] '},
+					{separator:'---------------' },
+					{name:'Quotes', openWith:'[quote]', closeWith:'[/quote]'},
+					{name:'Code', openWith:'[code]', closeWith:'[/code]'},
+					{separator:'---------------' },
+					{name:'Clean', className:"clean", replaceWith:function(markitup) { return markitup.selection.replace(/\[(.*?)\]/g, "") } },
+					{name:'Preview', className:"preview", call:'preview' }
+				]
+			};
+
+			function initBBeditor(box){
+				box.find('.markItUpMe').markItUp(mySettings);
+				box.find('.emoticons a').click(function(e) {
+					e.preventDefault();
+					emoticon = $(this).attr('title');
+					jQuery.markItUp( { replaceWith:emoticon } );
+				});
+			}
+
+			function openBBeditor(el){
+				if (window.bbeditor_is_active == true) {
+					alert('Please close other editors.');
+					return;
+				}
+				window.bbeditor_is_active = true;
+				var box = jQuery(el).parents('.comment');
+				var box_id = box.attr('id');
+				var bbeditor_tpl = jQuery('#bbeditor_tpl').html();
+				bbeditor_tpl = bbeditor_tpl.replace('%x1%', box.find('.comment-raw').html());
+				box.find('.comment-body, .comment-actions').addClass('hidden');
+				box.find('.comment-editor').append(jQuery(bbeditor_tpl)).removeClass('hidden');
+				initBBeditor(box);
+				box.stop().css('background-color', '#f6ff00').animate({backgroundColor: '#fff'}, 1000);
+			}
+
+			function openBBeditorForNewReply(item_id) {
+				var el = jQuery('#add_reply')[0];
+				if (window.bbeditor_is_active == false) {
+					openBBeditor(el);
+				}
+				if (item_id != null) {
+					var box = jQuery('.comment#'+item_id);
+					var item_raw = box.find('.comment-raw').html();
+					var author = box.find('.comment-author').text();
+					var quote = '[quote="'+author+'"]'+item_raw+'[/quote]';
+					animateScrollToHash('#new-comment-editor', 500, function(){
+						jQuery.markItUp( { target:'.markItUpMe', replaceWith:quote } );
+					});
+				} else {
+					animateScrollToHash('#new-comment-editor', 500, function(){});
+				}
+			}
+
+
+			function saveBBeditor(el) {
+				var box = jQuery(el).parents('.comment');
+				hideActionButtons(box);
+
+				var box_id = box.attr('id');
+				var box_name = box.attr('name');
+				var box_editor_body =  box.find('textarea').val();
+				box.find('.bbeditor .form-group').removeClass('has-error').find('.help-block').text('').addClass('hidden');
+
+				var post_url = '';
+				if (box_id == 'new_comment') {
+					post_url = '/blog/action/new-comment/{{ post.slug }}'
+				} else {
+					post_url = '/blog/action/save-comment/'+box_name
+				}
+				$.ajax({
+					type : 'POST',
+					url : post_url,
+					data: JSON.stringify({ body: box_editor_body }),
+					contentType: 'application/json;charset=UTF-8',
+					success: function(data) {
+						if (data.status == 'ok') {
+							if (box_id == 'new_comment') {
+								window.location.href = '/{{ post.slug }}?hash='+data.comment_id+'#comment-'+data.comment_id;
+							} else {
+								showActionButtons(box);
+								box.find('.comment-body').html(data.body_html);
+								box.find('.comment-raw').html(data.body);
+								cancelBBeditor(el);
+							}
+						}
+					},
+					error: function(result) {
+						showActionButtons(box);
+						if (result.status == 403 || result.status == 404) {
+							window.location.href = '/';
+						}
+						if (result.hasOwnProperty('responseJSON')) {
+							if (result.responseJSON.hasOwnProperty('errors')) {
+								if (result.responseJSON.errors.hasOwnProperty('body')) {
+									var body_err = result.responseJSON.errors.body.join(', ');
+									box.find('.bbeditor .form-group').addClass('has-error').find('.help-block').text(body_err).removeClass('hidden');
+								}
+							}
+						}
+					}
+				});
+			}
+
+			function hideActionButtons(box) {
+				box.find('.bbeditor-actions').addClass('hidden');
+				box.find('.ajax-progress').removeClass('hidden');
+			}
+			function showActionButtons(box) {
+				box.find('.bbeditor-actions').removeClass('hidden');
+				box.find('.ajax-progress').addClass('hidden');
+			}
+
+			function cancelBBeditor(el) {
+				window.bbeditor_is_active = false;
+				var box = jQuery(el).parents('.comment');
+				box.find('.comment-editor').addClass('hidden').html('');
+				box.find('.comment-body, .comment-actions').removeClass('hidden');
+				box.stop().css('background-color', '#f6ff00').animate({backgroundColor: '#fff'}, 1000);
+			}
+
+			function InsertPicture(pic, type) {
+				if (type == 'editor') {
+					img_tag = '[img]/pictures/' + pic + '[/img]';
+					jQuery.markItUp({replaceWith: img_tag});
+				}
+			}
+
+			jQuery(function(){
+				jQuery('.article-img, .article-thumbnail').each(function(){
+					var img = jQuery(this).find('img');
+					jQuery(this).html(jQuery('<a class="fancybox" rel="group" href="'+img.attr('src')+'"></a>').append(img));
+				});
+				$(".fancybox").fancybox({
+					helpers: {
+						overlay: {
+							locked: false
+						}
+					}
+				});
+			});
+
+		</script>
+	{% endif %}
 
 	<link rel="stylesheet" type="text/css" href="https://google-code-prettify.googlecode.com/svn/loader/prettify.css">
 	<script src="https://google-code-prettify.googlecode.com/svn/loader/run_prettify.js"></script>
@@ -29,180 +203,6 @@
 			margin: 10px 0;
 		}
 	</style>
-
-	<script type="text/javascript" >
-
-		window.bbeditor_is_active = false;
-
-		mySettings = {
-			previewParserPath:	'/blog/bb/preview', // path to your BBCode parser
-			onShiftEnter:	{keepDefault:false, replaceWith:'[br /]\n'},
-			onCtrlEnter:	{keepDefault:false, openWith:'\n[p]', closeWith:'[/p]\n'},
-			onTab:			{keepDefault:false, openWith:'	'},
-			markupSet: [
-				{name:'Heading 2', key:'2', openWith:'[h2(!( class="[![Class]!]")!)]', closeWith:'[/h2]', placeHolder:'Your title here...' },
-				{name:'Heading 3', key:'3', openWith:'[h3(!( class="[![Class]!]")!)]', closeWith:'[/h3]', placeHolder:'Your title here...' },
-				{name:'Heading 4', key:'4', openWith:'[h4(!( class="[![Class]!]")!)]', closeWith:'[/h4]', placeHolder:'Your title here...' },
-				{name:'Paragraph', openWith:'[p(!( class="[![Class]!]")!)]', closeWith:'[/p]' },
-				{name:'Bold', key:'B', openWith:'[b]', closeWith:'[/b]'},
-				{name:'Italic', key:'I', openWith:'[i]', closeWith:'[/i]'},
-				{name:'Underline', key:'U', openWith:'[u]', closeWith:'[/u]'},
-				{separator:'---------------' },
-				{name:'Picture', key:'P', replaceWith:'[img][![Url]!][/img]'},
-				{name:'Link', key:'L', openWith:'[url=[![Url]!]]', closeWith:'[/url]', placeHolder:'Your text to link here...'},
-				{separator:'---------------' },
-				{name:'Size', key:'S', openWith:'[size=[![Text size]!]]', closeWith:'[/size]',
-				dropMenu :[
-					{name:'Big', openWith:'[size=200]', closeWith:'[/size]' },
-					{name:'Normal', openWith:'[size=100]', closeWith:'[/size]' },
-					{name:'Small', openWith:'[size=50]', closeWith:'[/size]' }
-				]},
-				{separator:'---------------' },
-				{name:'Bulleted list', openWith:'[list]\n', closeWith:'\n[/list]'},
-				{name:'Numeric list', openWith:'[list=[![Starting number]!]]\n', closeWith:'\n[/list]'},
-				{name:'List item', openWith:'[*] '},
-				{separator:'---------------' },
-				{name:'Quotes', openWith:'[quote]', closeWith:'[/quote]'},
-				{name:'Code', openWith:'[code]', closeWith:'[/code]'},
-				{separator:'---------------' },
-				{name:'Clean', className:"clean", replaceWith:function(markitup) { return markitup.selection.replace(/\[(.*?)\]/g, "") } },
-				{name:'Preview', className:"preview", call:'preview' }
-			]
-		};
-
-		function initBBeditor(box){
-			box.find('.markItUpMe').markItUp(mySettings);
-			box.find('.emoticons a').click(function(e) {
-				e.preventDefault();
-				emoticon = $(this).attr('title');
-				jQuery.markItUp( { replaceWith:emoticon } );
-			});
-		}
-
-		function openBBeditor(el){
-			if (window.bbeditor_is_active == true) {
-				alert('Please close other editors.');
-				return;
-			}
-			window.bbeditor_is_active = true;
-			var box = jQuery(el).parents('.comment');
-			var box_id = box.attr('id');
-			var bbeditor_tpl = jQuery('#bbeditor_tpl').html();
-			bbeditor_tpl = bbeditor_tpl.replace('%x1%', box.find('.comment-raw').html());
-			box.find('.comment-body, .comment-actions').addClass('hidden');
-			box.find('.comment-editor').append(jQuery(bbeditor_tpl)).removeClass('hidden');
-			initBBeditor(box);
-			box.stop().css('background-color', '#f6ff00').animate({backgroundColor: '#fff'}, 1000);
-		}
-
-		function openBBeditorForNewReply(item_id) {
-			var el = jQuery('#add_reply')[0];
-			if (window.bbeditor_is_active == false) {
-				openBBeditor(el);
-			}
-			if (item_id != null) {
-				var box = jQuery('.comment#'+item_id);
-				var item_raw = box.find('.comment-raw').html();
-				var author = box.find('.comment-author').text();
-				var quote = '[quote="'+author+'"]'+item_raw+'[/quote]';
-				animateScrollToHash('#new-comment-editor', 500, function(){
-					jQuery.markItUp( { target:'.markItUpMe', replaceWith:quote } );
-				});
-			} else {
-				animateScrollToHash('#new-comment-editor', 500, function(){});
-			}
-		}
-
-
-		function saveBBeditor(el) {
-			var box = jQuery(el).parents('.comment');
-			hideActionButtons(box);
-
-			var box_id = box.attr('id');
-			var box_name = box.attr('name');
-			var box_editor_body =  box.find('textarea').val();
-			box.find('.bbeditor .form-group').removeClass('has-error').find('.help-block').text('').addClass('hidden');
-
-			var post_url = '';
-			if (box_id == 'new_comment') {
-				post_url = '/blog/action/new-comment/{{ post.slug }}'
-			} else {
-				post_url = '/blog/action/save-comment/'+box_name
-			}
-			$.ajax({
-				type : 'POST',
-				url : post_url,
-				data: JSON.stringify({ body: box_editor_body }),
-				contentType: 'application/json;charset=UTF-8',
-				success: function(data) {
-					if (data.status == 'ok') {
-						if (box_id == 'new_comment') {
-							window.location.href = '/{{ post.slug }}?hash='+data.comment_id+'#comment-'+data.comment_id;
-						} else {
-							showActionButtons(box);
-							box.find('.comment-body').html(data.body_html);
-							box.find('.comment-raw').html(data.body);
-							cancelBBeditor(el);
-						}
-					}
-				},
-				error: function(result) {
-					showActionButtons(box);
-					if (result.status == 403 || result.status == 404) {
-						window.location.href = '/';
-					}
-					if (result.hasOwnProperty('responseJSON')) {
-						if (result.responseJSON.hasOwnProperty('errors')) {
-							if (result.responseJSON.errors.hasOwnProperty('body')) {
-								var body_err = result.responseJSON.errors.body.join(', ');
-								box.find('.bbeditor .form-group').addClass('has-error').find('.help-block').text(body_err).removeClass('hidden');
-							}
-						}
-					}
-				}
-			});
-		}
-
-		function hideActionButtons(box) {
-			box.find('.bbeditor-actions').addClass('hidden');
-			box.find('.ajax-progress').removeClass('hidden');
-		}
-		function showActionButtons(box) {
-			box.find('.bbeditor-actions').removeClass('hidden');
-			box.find('.ajax-progress').addClass('hidden');
-		}
-
-		function cancelBBeditor(el) {
-			window.bbeditor_is_active = false;
-			var box = jQuery(el).parents('.comment');
-			box.find('.comment-editor').addClass('hidden').html('');
-			box.find('.comment-body, .comment-actions').removeClass('hidden');
-			box.stop().css('background-color', '#f6ff00').animate({backgroundColor: '#fff'}, 1000);
-		}
-
-		function InsertPicture(pic, type) {
-			if (type == 'editor') {
-				img_tag = '[img]/pictures/' + pic + '[/img]';
-				jQuery.markItUp({replaceWith: img_tag});
-			}
-		}
-
-		jQuery(function(){
-			jQuery('.article-img, .article-thumbnail').each(function(){
-				var img = jQuery(this).find('img');
-				jQuery(this).html(jQuery('<a class="fancybox" rel="group" href="'+img.attr('src')+'"></a>').append(img));
-			});
-			$(".fancybox").fancybox({
-				helpers: {
-					overlay: {
-						locked: false
-					}
-				}
-			});
-		});
-
-	</script>
-	{% endif %}
 
 
 	<div class="container with-padding article-view">
