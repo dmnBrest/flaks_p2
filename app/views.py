@@ -179,7 +179,7 @@ def blog_list(page=1):
 	total_drafts = None
 	if current_user.has_role('editor'):
 		total_drafts = Post.query.options(load_only('id')).filter(Post.user_id == current_user.id, Post.published_at == None).count()
-	meta = Meta(title='Blog | Salesforce-Developer.NET',
+	meta = Meta(title='Blog | Salesforce-Developer.net',
 				description='Blog for Salesforce Developers with main technical information and examples of apex code.',
 				keywords='salesforce blog, apex blog, visualforce blog'
 				)
@@ -201,7 +201,7 @@ def blog_by_author(user_slug, page=1):
 	total_drafts = None
 	if current_user.has_role('editor'):
 		total_drafts = Post.query.options(load_only('id')).filter(Post.user_id == current_user.id, Post.published_at == None).count()
-	meta = Meta(title='Articles by '+user.fullname()+' | Salesforce-Developer.NET',
+	meta = Meta(title='Articles by '+user.fullname()+' | Salesforce-Developer.net',
 				description='All articler by '+user.fullname()+' published on Salesforce-Developer.net',
 				keywords='salesforce articles, '+user.fullname()
 				)
@@ -223,7 +223,7 @@ def blog_my_drafts(page=1):
 	total_drafts = None
 	if current_user.has_role('editor'):
 		total_drafts = Post.query.options(load_only('id')).filter(Post.user_id == current_user.id, Post.published_at == None).count()
-	meta = Meta(title='My Drafts | Salesforce-Developer.NET',
+	meta = Meta(title='My Drafts | Salesforce-Developer.net',
 				description='My drafts on Salesforce-Developer.net',
 				keywords='my drafts'
 				)
@@ -593,7 +593,7 @@ def top_slug(slug):
 		if post.published_at is None:
 			flash('This post is not published. Only you can see it.', 'warning')
 		comments = Comment.query.filter(Comment.post_id==post.id).order_by(Comment.created_at)
-		meta = Meta(title=post.title+' | Salesforce-Developer.NET',
+		meta = Meta(title=post.title+' | Salesforce-Developer.net',
 				description=post.meta_description,
 				keywords=post.meta_description
 				)
@@ -606,7 +606,7 @@ def top_slug(slug):
 		g.breadcrumbs.append(Breadcrumb('/forum/'+topic.forum.slug, topic.forum.title))
 		g.breadcrumbs.append(Breadcrumb('', topic.title))
 		posts = ForumPost.query.filter_by(topic_id=topic.id).order_by(ForumPost.created_at)
-		meta = Meta(title=topic.title+' | Salesforce-Developer.NET',
+		meta = Meta(title=topic.title+' | Salesforce-Developer.net',
 				description=topic.title,
 				keywords=topic.forum.title)
 		return render_template('topic_view.html', topic=topic, posts=posts, meta=meta)
