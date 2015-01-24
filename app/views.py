@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from app import app, db, bbcode_parser, redis_store
+from app import app, db, bbcode_parser, redis_store, mail
 from flask import request, render_template, redirect, url_for, send_from_directory, abort, flash, g, jsonify
 import datetime
 import os
@@ -17,6 +17,7 @@ from flask.ext.security.utils import verify_password, encrypt_password
 from unidecode import unidecode
 from sqlalchemy.orm import joinedload, load_only, undefer_group
 import random
+from flask.ext.mail import Message
 
 
 @app.route('/')
@@ -27,12 +28,10 @@ def home():
 	#flash('DOOM FLASH!!!!', 'error')
 	#flash('DOOM FLASH!!!!', 'success')
 
-	# msg = Message("Hello", sender="from@example.com", recipients=["to@example.com"])
-	# msg.body = "testing"
-	# msg.html = "<b>testing</b>"
-	# mail.send(msg)
-
-
+	msg = Message("Hello from SFDEV.net", recipients=["dmitry.shnyrev@gmail.com"])
+	msg.body = "testing from Home"
+	msg.html = "<b>testing from Home</b>"
+	mail.send(msg)
 
 	# u1 = User.query.first()
 	# u1.first_name = 'f1'
