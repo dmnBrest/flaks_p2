@@ -34,7 +34,14 @@ def home():
 	# 	redis_store.set('potato', 'XXXXX')
 	# app.logger.debug(p)
 
-	return render_template('home.html')
+	last_posts = Post.query.filter(Post.published_at != None).order_by(Post.published_at.desc()).limit(5)
+	for post in last_posts:
+		if post.thumbnail:
+			post.thumbnail = post.thumbnail.replace('/pictures/', '/pictures/thumbs/thumb256_')
+		else:
+			post.thumbnail = '/static/no-image.jpg'
+
+	return render_template('home.html', last_posts=last_posts)
 
 
 # ------------- PICTURES ------------------

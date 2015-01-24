@@ -100,6 +100,13 @@
 					<div class="col-xs-12">
 						<div class="from-blog">
 							<div class="box-4-title">Latest from Blog</div>
+							{% for post in last_posts %}
+								<a href="/{{ post.slug }}" class="from-blog-item">
+									<img src="{{ post.thumbnail }}" alt=""/><br/>
+									{{ post.title }}
+								</a>
+							{% endfor %}
+							<a class="see-all" href="{{ url_for('blog_list') }}"><span>See All</span></a>
 						</div>
 						<div class="from-forum md-right">
 							<div class="box-4-title">Latest from Forum</div>

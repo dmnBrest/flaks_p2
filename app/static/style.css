@@ -138,6 +138,14 @@ font-weight: 300;}
 .home .box-4 {padding: 40px 0;}
 .home .box-4-title {font-size: 32px; font-weight: 200;}
 
+.home a.from-blog-item {display: inline-block; width: 128px; margin: 0 20px 20px 0; vertical-align: top;}
+.home a.from-blog-item img {width: 128px; border: 1px solid #fff; margin-bottom: 10px; transition: border .3s;}
+.home a.from-blog-item:hover img {border: 1px solid #00C6F0; }
+.home a.see-all {display: inline-block; width: 128px; height: 128px; background-color: #00c6f0; color: #fff;
+	vertical-align: top; text-align: center; border: 1px solid #fff; transition: border .3s;}
+.home a.see-all:hover {border: 1px solid #00C6F0;}
+.home a.see-all span {display: inline-block; margin-top: 45px; font-size: 20px; font-weight: 300;}
+
 .forum-list .forum {margin-bottom: 20px;}
 .forum-list .forum-title {font-size: 25px;}
 .forum-list .forum-title a {font-weight: 300;}
