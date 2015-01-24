@@ -3,7 +3,6 @@
 from flask import Flask, request_started, session, request
 from flask_debugtoolbar import DebugToolbarExtension
 from flask_redis import Redis
-import logging
 from flask.ext.sqlalchemy import SQLAlchemy
 from flask_mail import Mail
 from flask.ext.security import Security, SQLAlchemyUserDatastore
@@ -11,19 +10,10 @@ from flask_security.forms import ConfirmRegisterForm
 from wtforms import StringField, validators
 from flask_wtf import RecaptchaField
 from flask_wtf.csrf import CsrfProtect
-from flask.ext.script import Manager, Option, Command
+from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
 
 import bbcode
-
-
-# ----------- LOGGER ----------------------
-# logging.basicConfig() #filename='appx.log'
-#logging.getLogger('werkzeug').setLevel(logging.WARNING)
-#logging.getLogger('sqlalchemy').setLevel(logging.INFO)
-#log_file = logging.FileHandler(filename='appx.log')
-#logging.getLogger('werkzeug').addHandler(log_file)
-#logging.getLogger('sqlalchemy').addHandler(log_file)
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -41,6 +31,32 @@ CsrfProtect(app)
 migrate = Migrate(app, db)
 manager = Manager(app)
 manager.add_command('db', MigrateCommand)
+
+
+# ----------- LOGGER ----------------------
+# logging.basicConfig() #filename='appx.log'
+#logging.getLogger('werkzeug').setLevel(logging.WARNING)
+#logging.getLogger('sqlalchemy').setLevel(logging.INFO)
+#log_file = logging.FileHandler(filename='appx.log')
+#logging.getLogger('werkzeug').addHandler(log_file)
+#logging.getLogger('sqlalchemy').addHandler(log_file)
+ADMINS = ['dmitry.shnyrev@gmail.com']
+if not app.debug:
+	import logging
+	from logging.handlers import SMTPHandler
+	mail_handler = SMTPHandler(mailhost=(app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
+								fromaddr='server-error@salesforce-developer.net',
+								toaddrs=ADMINS,
+								subject='Salesforce-Developer.NET Failed',
+								credentials=(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD']),
+								secure=()
+	)
+	mail_handler.setLevel(logging.ERROR)
+	app.logger.addHandler(mail_handler)
+	file_handler = logging.FileHandler(filename=app.config['LOG_FILE'])
+	file_handler.setLevel(logging.WARNING)
+	app.logger.addHandler(file_handler)
+
 
 # ------------ BBCODE PARSER CUSTOM TAGS -----------
 bbcode_parser = bbcode.Parser()
