@@ -33,7 +33,7 @@ footer .copyright {padding-top: 14px; font-size: 12px;}
 
 form .help-block {font-size: 12px;}
 
-.breadcrumb {background-color: #fff; padding: 8px 0; margin-bottom: 0;}
+.breadcrumb {background-color: #fff; padding: 8px 0; margin-bottom: 0; text-transform: uppercase; font-size: 12px;}
 
 .flashbox {padding: 5px 0; color: #FFFFFF;}
 .flashbox.flash-error {background-color: #e74c3c;}
