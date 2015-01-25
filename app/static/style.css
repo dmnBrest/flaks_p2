@@ -146,7 +146,7 @@ font-weight: 300;}
 .home a.see-all:hover {border: 1px solid #00C6F0;}
 .home a.see-all span {display: inline-block; margin-top: 45px; font-size: 20px; font-weight: 300;}
 
-.forum-list .forum {margin-bottom: 20px;}
+.forum-list .forum {margin-bottom: 20px; padding-bottom: 25px; border-bottom: 1px solid #c0c0c0;}
 .forum-list .forum-title {font-size: 25px;}
 .forum-list .forum-title a {font-weight: 300;}
 

@@ -231,7 +231,8 @@ class Forum(db.Model):
 	title				= db.Column(db.String(255), nullable=False)
 	description			= db.Column(db.Text)
 	total_topics		= db.Column(db.Integer)
-	last_post_id		= db.Column(db.Integer)
+	last_post_id		= db.Column(db.Integer, db.ForeignKey('forum_post.id', use_alter=True, name='fk_forum_post_id'))
+	last_post			= db.relationship("ForumPost", foreign_keys=[last_post_id])
 
 	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 	created_by 			= db.Column(db.Integer)
@@ -283,7 +284,7 @@ class ForumPost(db.Model):
 	user_id				= db.Column(db.Integer, db.ForeignKey('user.id'))
 	user 				= db.relationship("User")
 	forum_id			= db.Column(db.Integer, db.ForeignKey('forum.id'))
-	forum				= db.relationship("Forum")
+	forum				= db.relationship("Forum", foreign_keys=[forum_id])
 	topic_id			= db.Column(db.Integer, db.ForeignKey('forum_topic.id'))
 	topic				= db.relationship("ForumTopic", foreign_keys=[topic_id])
 	version				= db.Column(db.Integer)

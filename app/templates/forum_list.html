@@ -7,11 +7,25 @@
 				<br/>
 				{% for forum in forums %}
 					<div class="forum">
-						<div class="forum-title">
-							<a href="{{ url_for('forum_view', slug=forum.slug) }}"><i class="fa fa-comments"></i>&nbsp;&nbsp;{{ forum.title }}</a>
-						</div>
-						<div class="forum-info">
-
+						<div class="row">
+							<div class="col-md-6">
+								<div class="forum-title">
+									<a href="{{ url_for('forum_view', slug=forum.slug) }}"><i class="fa fa-comments"></i>&nbsp;&nbsp;{{ forum.title }}</a>
+								</div>
+								<div class="forum-description">
+									{{ forum.description }}
+								</div>
+							</div>
+							<div class="col-md-4 md-right">
+								{% if forum.last_post %}
+									Last reply:<br/>
+									<a href="{{ url_for('top_slug', slug=forum.last_post.topic.slug) }}#reply-{{ forum.last_post_id }}">Re: {{ forum.last_post.topic.title }}</a><br/>
+									by <i class="fa fa-user"></i>&nbsp;<a href="{{ url_for('user_view', slug=forum.last_post.user.slug) }}">{{ forum.last_post.user.fullname() }}</a>
+								{% endif %}
+							</div>
+							<div class="col-md-2 md-right">
+								Total topics: {{ forum.total_topics }}
+							</div>
 						</div>
 					</div>
 				{% endfor %}
