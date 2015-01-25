@@ -178,6 +178,9 @@ font-weight: 300;}
 .btn.btn-action {padding: 10px 22px; background-color: #00B6DE; border: #00B6DE; color: #fff;}
 .btn.btn-action:hover {background-color: #00c6f0; border: #00c6f0; color: #fff;}
 
+.community-map h1, .community-list h1 {display: inline-block; margin-right: 20px;}
+
+
 .join_us {
 	display: inline-block;
 	font: bold 16px Arial;
