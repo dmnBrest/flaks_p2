@@ -1,15 +1,15 @@
 {% extends "layout.html" %}
 {% block content %}
 
+	<link rel="stylesheet" href="/static/fancybox/source/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
+	<script type="text/javascript" src="/static/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
 	{% if current_user.is_authenticated() %}
 		<script src="/static/jquery.color-2.1.2.min.js"></script>
 
 		<script type="text/javascript" src="/static/markitup/jquery.markitup.js"></script>
 		<link rel="stylesheet" type="text/css" href="/static/markitup/skins/simple/style.css" />
 		<link rel="stylesheet" type="text/css" href="/static/markitup/sets/bbcode/style.css" />
-
-		<link rel="stylesheet" href="/static/fancybox/source/jquery.fancybox.css?v=2.1.5" type="text/css" media="screen" />
-		<script type="text/javascript" src="/static/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
 
 		<script type="text/javascript" >
 
@@ -168,20 +168,6 @@
 				}
 			}
 
-			jQuery(function(){
-				jQuery('.article-img, .article-thumbnail').each(function(){
-					var img = jQuery(this).find('img');
-					jQuery(this).html(jQuery('<a class="fancybox" rel="group" href="'+img.attr('src')+'"></a>').append(img));
-				});
-				$(".fancybox").fancybox({
-					helpers: {
-						overlay: {
-							locked: false
-						}
-					}
-				});
-			});
-
 		</script>
 	{% endif %}
 
@@ -204,6 +190,21 @@
 		}
 	</style>
 
+	<script>
+		jQuery(function(){
+			jQuery('.article-img, .article-thumbnail').each(function(){
+				var img = jQuery(this).find('img');
+				jQuery(this).html(jQuery('<a class="fancybox" rel="group" href="'+img.attr('src')+'"></a>').append(img));
+			});
+			$(".fancybox").fancybox({
+				helpers: {
+					overlay: {
+						locked: false
+					}
+				}
+			});
+		});
+	</script>
 
 	<div class="container with-padding article-view">
 		<div class="row">
