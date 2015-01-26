@@ -81,7 +81,6 @@ class ForumTopicService(object):
 		db.session.add(topic)
 		db.session.commit()
 		forum = topic.forum
-		forum.last_post_id = forum.id
 		forum.total_topics = (forum.total_topics or 0) + 1
 		db.session.add(forum)
 		db.session.commit()
