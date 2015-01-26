@@ -233,7 +233,7 @@ class Forum(db.Model):
 	total_topics		= db.Column(db.Integer)
 	last_post_id		= db.Column(db.Integer, db.ForeignKey('forum_post.id', use_alter=True, name='fk_forum_post_id'))
 	last_post			= db.relationship("ForumPost", foreign_keys=[last_post_id])
-	order				= db.Column(db.Integer)
+	sequence			= db.Column(db.Integer)
 
 	created_at 			= db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 	created_by 			= db.Column(db.Integer)

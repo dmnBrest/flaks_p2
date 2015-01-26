@@ -470,7 +470,7 @@ def forum_list():
 	g.breadcrumbs = []
 	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
 	g.breadcrumbs.append(Breadcrumb('/forum', 'Forums'))
-	forums = Forum.query.order_by('order').all()
+	forums = Forum.query.order_by('sequence').all()
 	return render_template('forum_list.html', forums=forums)
 
 
