@@ -95,6 +95,7 @@
 			} else if (box_id != 'new_post') {
 				animateScrollToHash('#'+box_id, 500, function(){});
 			}
+			jQuery('#new-replay-editor .global-actions').addClass('hidden');
 			initBBeditor(box);
 			box.stop().css('background-color', '#f6ff00').animate({backgroundColor: '#fff'}, 1000);
 		}
@@ -229,6 +230,7 @@
 		function cancelBBeditor(el) {
 			window.bbeditor_is_active = false;
 			var box = jQuery(el).parents('.item-wrapper');
+			jQuery('#new-replay-editor .global-actions').removeClass('hidden');
 			box.find('.item-editor').addClass('hidden').html('');
 			box.find('.item-body').removeClass('hidden');
 			box.stop().css('background-color', '#f6ff00').animate({backgroundColor: '#fff'}, 1000);

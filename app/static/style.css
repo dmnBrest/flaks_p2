@@ -154,8 +154,8 @@ font-weight: 300;}
 .forum-view .topic {margin-bottom: 20px; border: 1px solid #e0e0e0; padding: 10px 15px 15px 15px; border-top: 3px solid #e0e0e0;}
 .forum-view .topic:hover {border-top: 3px solid #00B4DC;}
 
-.forum-view .topic-icon {display: inline-block; vertical-align: top; font-size: 32px;}
-.forum-view .topic-body {display: inline-block;}
+.forum-view .topic-icon {display: inline-block; vertical-align: top; font-size: 32px; width: 10%;}
+.forum-view .topic-body {display: inline-block; width: 89%;}
 
 
 .forum-view .topic-title {font-size: 25px;}
