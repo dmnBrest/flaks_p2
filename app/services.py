@@ -120,7 +120,7 @@ class ForumPostService(object):
 	@classmethod
 	def update(cls, post):
 		post.body_html = smile_it(bbcode_parser.format(post.body.strip()))
-		post_history = ForumTopicHistory()
+		post_history = ForumPostHistory()
 		post_history.version = post.version
 		post.version += 1
 		post_history.body = attr_old_value(post, 'body')
