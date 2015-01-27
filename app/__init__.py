@@ -12,8 +12,8 @@ from flask_wtf import RecaptchaField
 from flask_wtf.csrf import CsrfProtect
 from flask.ext.script import Manager
 from flask.ext.migrate import Migrate, MigrateCommand
-
-import bbcode
+from jinja2 import evalcontextfilter, Markup, escape
+import bbcode, re
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -22,6 +22,18 @@ redis_store = Redis(app)
 
 app.jinja_env.trim_blocks = True
 app.jinja_env.lstrip_blocks = True
+
+_paragraph_re = re.compile(r'(?:\r\n|\r|\n){2,}')
+
+@app.template_filter()
+@evalcontextfilter
+def nl2br(eval_ctx, value):
+    result = u'\n\n'.join(u'<p>%s</p>' % p.replace('\n', '<br>\n') \
+        for p in _paragraph_re.split(escape(value)))
+    if eval_ctx.autoescape:
+        result = Markup(result)
+    return result
+
 
 db = SQLAlchemy(app)
 mail = Mail(app)

@@ -53,19 +53,19 @@
 								<div>
 									Salesforce skills:
 									<div class="box-content">
-										{{ user.sfdc_skills or '-' }}
+										{{ (user.sfdc_skills or '-') | nl2br }}
 									</div>
 								</div>
 								<div>
 									Salesforce certificates:
 									<div class="box-content">
-										{{ user.sfdc_certificates or '-' }}
+										{{ (user.sfdc_certificates or '-') | nl2br }}
 									</div>
 								</div>
 								<div>
 									Other skills:
 									<div class="box-content">
-										{{ user.other_skills or '-' }}
+										{{ (user.other_skills or '-') | nl2br }}
 									</div>
 								</div>
 							</div>
@@ -80,7 +80,7 @@
 								</div>
 								About company:
 								<div class="box-content">
-									{{ user.company_info or '-' }}
+									{{ (user.company_info or '-') | nl2br }}
 								</div>
 							</div>
 						{% endif %}
@@ -121,7 +121,7 @@
 							<div class="box">
 								<h2>About myself</h2>
 								<div class="box-content">
-									{{ user.about_myself or '-' }}
+									{{ (user.about_myself or '-') | nl2br }}
 								</div>
 							</div>
 						{% endif %}
