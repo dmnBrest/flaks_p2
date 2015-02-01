@@ -29,7 +29,7 @@
 										<a href="{{ url_for('user_view', slug=topic.user.slug) }}">{{ topic.user.fullname() }}</a>
 										&nbsp;
 										<i class="fa fa-clock-o"></i>
-										<time datetime="{{ topic.created_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
+										<time datetime="{{ topic.created_at.isoformat() }}"></time>
 									</div>
 								</div>
 							</div>

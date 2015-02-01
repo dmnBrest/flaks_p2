@@ -271,7 +271,7 @@
 								<a class="comment-author" href="{{ url_for('user_view', slug=comment.user.slug) }}">{{ comment.user.fullname() }}</a>
 								&nbsp;
 								<i class="fa fa-clock-o"></i>
-								<time datetime="{{ comment.created_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
+								<time datetime="{{ comment.created_at.isoformat() }}"></time>
 
 							</div>
 							<div class="comment-body">{{ comment.body_html|safe }}</div>
