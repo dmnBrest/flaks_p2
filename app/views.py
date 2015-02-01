@@ -471,7 +471,11 @@ def forum_list():
 	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
 	g.breadcrumbs.append(Breadcrumb('/forum', 'Forums'))
 	forums = Forum.query.order_by('sequence').all()
-	return render_template('forum_list.html', forums=forums)
+	meta = Meta(title='Forum | Salesforce-Developer.net',
+		description='Forum for Salesforce Developers. Join us and start to discuss dev topics.',
+		keywords='salesforce forum, sfdc forum, about salesforce, salesforce development, salesforce integration'
+		)
+	return render_template('forum_list.html', forums=forums, meta=meta)
 
 
 @app.route('/forum/<string:slug>')
@@ -485,7 +489,11 @@ def forum_view(slug, page=1):
 	topics = ForumTopic.query.filter_by(forum_id=forum.id).\
 					order_by(ForumTopic.created_at.desc()).\
 					paginate(page, 20, True)
-	return render_template('forum_view.html', forum=forum, topics=topics)
+	meta = Meta(title=forum.title + ' | Salesforce-Developer.net',
+		description=forum.description,
+		keywords=forum.title
+		)
+	return render_template('forum_view.html', forum=forum, topics=topics, meta=meta)
 
 
 @app.route('/forum/action/new-topic/<string:forum_slug>', methods=['GET'])
