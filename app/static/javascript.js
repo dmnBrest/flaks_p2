@@ -11,7 +11,7 @@ jQuery(function(){
 
 	jQuery('time').each(function(){
 		var d = jQuery(this).attr('datetime');
-		jQuery(this).text(moment(d).format("LLL"));
+		jQuery(this).text(moment(d).format("LL"));
 	});
 });
 
