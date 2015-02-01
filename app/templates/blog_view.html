@@ -210,17 +210,19 @@
 		<div class="row">
 			<div class="col-xs-12">
 
-				<article>
+				<article itemscope itemtype="http://schema.org/Article">
 					<div class="row">
 						<div class="col-md-8 article-title">
-							<h1>{{ post.title }}</h1>
+							<h1 itemprop="name">{{ post.title }}</h1>
 							<div class="article-info">
 								<i class="fa fa-user"></i>
-								<a href="{{ url_for('user_view', slug=post.user.slug) }}">{{ post.user.fullname() }}</a>
+								<span itemprop="author" itemscope itemtype="http://schema.org/Person">
+									<a href="{{ url_for('user_view', slug=post.user.slug) }}"><span itemprop="name">{{ post.user.fullname() }}</span></a>
+								</span>
 								{% if post.published_at %}
 									&nbsp;
 									<i class="fa fa-clock-o"></i>
-									<time datetime="{{ post.published_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
+									<time itemprop="datePublished" content="{{ post.published_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}" datetime="{{ post.published_at.strftime("%Y-%m-%dT%H:%M:%S Z") }}"></time>
 								{% else %}
 									&nbsp;
 									<span class="label label-danger" style="vertical-align: top;">Draft</span>
@@ -244,16 +246,18 @@
 
 					{% if post.thumbnail %}
 						<div class="article-thumbnail">
-							<img src="{{ post.thumbnail }}" alt=""/>
+							<img src="{{ post.thumbnail }}" itemprop="image" alt="{{ post.title }}"/>
 						</div>
 					{% endif %}
-					<div class="article-preview">
-						{{ post.preview_html | safe }}
-					</div>
-					<div class="article-body">
-						{% if post.body_html %}
-							{{ post.body_html | safe }}
-						{% endif %}
+					<div itemprop="articleBody">
+						<div class="article-preview">
+							{{ post.preview_html | safe }}
+						</div>
+						<div class="article-body">
+							{% if post.body_html %}
+								{{ post.body_html | safe }}
+							{% endif %}
+						</div>
 					</div>
 				</article>
 
