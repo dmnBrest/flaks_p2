@@ -101,7 +101,7 @@
 					</div>
 					{{ form_field(form.body, class='markItUpMe') }}
  					<div class="form-group ">
-						<label for="meta_keywords">
+						<label>
 							Thumbnail:
 						</label>
 						<div class="row">
@@ -127,8 +127,8 @@
 						</div>
 					</div>
 					<br />
-					{{ form_field(form.meta_keywords, with_label=True) }}
 					{{ form_field(form.meta_description, with_label=True) }}
+					{{ form_field(form.meta_keywords, with_label=True) }}
 					<br/>
 					{% if post %}
 						<div class="row">

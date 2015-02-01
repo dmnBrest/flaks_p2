@@ -595,7 +595,7 @@ def top_slug(slug):
 		comments = Comment.query.filter(Comment.post_id==post.id).order_by(Comment.created_at)
 		meta = Meta(title=post.title+' | Salesforce-Developer.net',
 				description=post.meta_description,
-				keywords=post.meta_description
+				keywords=post.meta_keywords
 				)
 		return render_template('blog_view.html', post=post, meta=meta, comments=comments)
 	topic = ForumTopic.query.filter(ForumTopic.slug==slug).first()
