@@ -216,9 +216,7 @@
 							<h1 itemprop="name">{{ post.title }}</h1>
 							<div class="article-info">
 								<i class="fa fa-user"></i>
-								<span itemprop="author" itemscope itemtype="http://schema.org/Person">
-									<a href="{{ url_for('user_view', slug=post.user.slug) }}"><span itemprop="name">{{ post.user.fullname() }}</span></a>
-								</span>
+								<a href="{{ url_for('user_view', slug=post.user.slug) }}"><span itemprop="author" itemscope itemtype="http://schema.org/Person"><span itemprop="name">{{ post.user.fullname() }}</span></span></a>
 								{% if post.published_at %}
 									&nbsp;
 									<i class="fa fa-clock-o"></i>
