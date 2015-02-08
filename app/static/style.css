@@ -181,6 +181,11 @@ font-weight: 300;}
 
 .community-map h1, .community-list h1 {display: inline-block; margin-right: 20px;}
 
+.community-list .users-list {margin-top: 20px; text-align: center;}
+.community-list .user-item {display: inline-block; margin: 5px 10px;}
+.community-list .user-item-thumb {margin-bottom: 5px;}
+.community-list .user-item-thumb img {width: 200px;}
+.community-list .user-item-name {text-align: center; font-size: 16px;}
 
 .join_us {
 	display: inline-block;

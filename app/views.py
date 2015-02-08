@@ -584,7 +584,8 @@ def community_list():
 	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
 	g.breadcrumbs.append(Breadcrumb('/community', 'Community'))
 	g.breadcrumbs.append(Breadcrumb('', 'List'))
-	return render_template('community_list.html')
+	users = User.query.filter(User.type != None, User.active == True, User.id != 1).order_by(User.login_count.desc())
+	return render_template('community_list.html', users=users)
 
 
 # ------------ GET by SLUG --------------
