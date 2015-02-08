@@ -575,7 +575,8 @@ def community_map():
 	g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
 	g.breadcrumbs.append(Breadcrumb('/community', 'Community'))
 	g.breadcrumbs.append(Breadcrumb('', 'Map'))
-	return render_template('community_map.html')
+	users = User.query.filter(User.type != None, User.active == True, User.id != 1, User.geo_lat != None, User.geo_lng != None).order_by(User.login_count.desc())
+	return render_template('community_map.html', users=users)
 
 
 @app.route('/community/list')
