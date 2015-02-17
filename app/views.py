@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from app import app, db, bbcode_parser, redis_store, mail
+from app import app, db, bbcode_parser, redis_store, mail, q
 from flask import request, render_template, redirect, url_for, send_from_directory, abort, flash, g, jsonify
 import datetime
 import os
@@ -17,12 +17,19 @@ from flask.ext.security.utils import verify_password, encrypt_password
 from unidecode import unidecode
 from sqlalchemy.orm import joinedload, load_only, undefer_group
 import random
-from flask.ext.mail import Message
-
+#from flask.ext.mail import Message
+from tasks import xprocess
 
 @app.route('/')
 #@login_required
 def home():
+
+	app.logger.debug('Process call.')
+	job = q.enqueue_call(func=xprocess, args=('FFFF',), result_ttl=5000)
+	app.logger.debug(job.get_id())
+
+	#j = process.delay(3)
+	#app.logger.debug(j)
 
 	# msg = Message("Hello from SFDEV.net", recipients=["dmitry.shnyrev@gmail.com"])
 	# msg.body = "testing from Home"
@@ -363,7 +370,7 @@ def user_edit(slug):
 				user.first_name		= form.first_name.data
 				user.last_name 		= form.last_name.data
 				user.birthdate		= form.birthdate.data
-				user.sfdc_start		= form.sfdc_start.data
+				user.sfdc_start		= form.sfdc_start.data if form.sfdc_start.data != '' else None
 				user.sfdc_skills	= form.sfdc_skills.data
 				user.sfdc_certificates = form.sfdc_certificates.data
 				user.other_skills	= form.other_skills.data
