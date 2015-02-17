@@ -358,8 +358,6 @@ def user_edit(slug):
 		abort(403)
 	if request.method == 'POST':
 		form = UserForm(request.form)
-		if form.sfdc_start.data == '':
-			form.sfdc_start.data = None
 		if form.validate():
 			user.type = form.type.data
 			user.geo_lat		= form.geo_lat.data
@@ -372,6 +370,8 @@ def user_edit(slug):
 				user.first_name		= form.first_name.data
 				user.last_name 		= form.last_name.data
 				user.birthdate		= form.birthdate.data
+				if form.sfdc_start.data == '':
+					form.sfdc_start.data = None
 				user.sfdc_start		= form.sfdc_start.data
 				user.sfdc_skills	= form.sfdc_skills.data
 				user.sfdc_certificates = form.sfdc_certificates.data
