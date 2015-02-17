@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from app import app, db, bbcode_parser, redis_store, mail, q
+from app import app, db, bbcode_parser, redis_store, mail #, q
 from flask import request, render_template, redirect, url_for, send_from_directory, abort, flash, g, jsonify
 import datetime
 import os
@@ -18,15 +18,15 @@ from unidecode import unidecode
 from sqlalchemy.orm import joinedload, load_only, undefer_group
 import random
 #from flask.ext.mail import Message
-from tasks import xprocess
+#from tasks import xprocess
 
 @app.route('/')
 #@login_required
 def home():
 
-	app.logger.debug('Process call.')
-	job = q.enqueue_call(func=xprocess, args=('FFFF',), result_ttl=5000)
-	app.logger.debug(job.get_id())
+	#app.logger.debug('Process call.')
+	#job = q.enqueue_call(func=xprocess, args=('FFFF',), result_ttl=5000)
+	#app.logger.debug(job.get_id())
 
 	#j = process.delay(3)
 	#app.logger.debug(j)
