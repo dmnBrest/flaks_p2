@@ -22,7 +22,7 @@ class CommentForm(Form):
 
 class UserForm(Form):
 	first_name 			= StringField('First name', [validators.Length(min=2, max=255), validators.Optional(), validators.Regexp(regex=r'^[\w-]+$', message='Value is too complicated.')])
-	last_name 			= StringField('First name', [validators.Length(min=2, max=255), validators.Optional(), validators.Regexp(regex=r'^[\w-]+$', message='Value is too complicated.')])
+	last_name 			= StringField('Last name', [validators.Length(min=2, max=255), validators.Optional(), validators.Regexp(regex=r'^[\w-]+$', message='Value is too complicated.')])
 	type				= SelectField('I\'m', choices=[(None, '- select -'), ('developer', 'Developer'), ('company', 'Company'), ('other', 'Other')], description='Developer, Company, Other')
 	birthdate			= DateField('Birthdate', [validators.Optional()], format='%m/%d/%Y', description='mm/dd/yyyy')
 	google_plus			= StringField('Google+', [validators.Optional(), validators.Regexp(regex=r'^https://plus.google.com/', message='URL is not valid')], description='ex.: https://plus.google.com/103521493967721088420')
