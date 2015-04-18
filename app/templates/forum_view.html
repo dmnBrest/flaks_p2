@@ -16,7 +16,7 @@
 				{% for topic in topics.items %}
 					<div class="topic">
 						<div class="row">
-							<div class="col-md-6">
+							<div class="col-md-7">
 								<div class="topic-icon">
 									<i class="fa fa-comments-o"></i>&nbsp;&nbsp;
 								</div>
@@ -42,11 +42,11 @@
 								{% endif %}
 							</div>
 							<div class="col-md-1">
-								<i class="fa fa-comment"></i>&nbsp;&nbsp;4
+								<i class="fa fa-comment"></i>&nbsp;&nbsp;{{ topic.total_posts if topic.total_posts else '0' }}
 							</div>
-							<div class="col-md-1">
+							<!-- <div class="col-md-1">
 								<i class="fa fa-eye"></i>&nbsp;&nbsp;12
-							</div>
+							</div> -->
 						</div>
 					</div>
 				{% endfor %}
