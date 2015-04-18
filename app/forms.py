@@ -32,7 +32,7 @@ class UserForm(Form):
 	geo_lat				= FloatField('Latitude', validators=[validators.Optional()])
 	geo_lng				= FloatField('Longitude', validators=[validators.Optional()])
 	geo_address			= StringField('Address')
-	sfdc_start			= SelectField('Start working with Salesforce from', choices=[('', '- select -'), ('2014', '2014'), ('2013', '2013'), ('2012', '2012'), ('2011', '2011'), ('2010', '2010'), ('2009', '2009')], validators=[validators.Optional()])
+	sfdc_start			= SelectField('Start working with Salesforce from', choices=[('', '- select -'), ('2015', '2015'), ('2014', '2014'), ('2013', '2013'), ('2012', '2012'), ('2011', '2011'), ('2010', '2010'), ('2009', '2009'), ('2008', '2008'), ('2007', '2007'), ('2006', '2006')], validators=[validators.Optional()])
 	sfdc_skills			= TextAreaField('Salesforce Skills', [validators.length(max=2048)])
 	sfdc_certificates	= TextAreaField('Certificates', [validators.length(max=1024)], description='ex.: Salesforce certified developer - DEV 401 (January 2012)')
 	other_skills		= TextAreaField('Other Skills', [validators.length(max=2048)], description='ex.: PHP, Python, Java, and others. Short description.')
