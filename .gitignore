@@ -7,4 +7,5 @@ config.py
 app/seed.py
 *.pyc
 app/*.pic
+app/static/ktdev6/
 
