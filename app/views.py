@@ -619,12 +619,18 @@ def top_slug(slug):
 		return render_template('blog_view.html', post=post, meta=meta, comments=comments)
 	topic = ForumTopic.query.filter(ForumTopic.slug==slug).first()
 	if topic:
+		#ForumTopicService.update(topic)
+		
 		g.breadcrumbs = []
 		g.breadcrumbs.append(Breadcrumb('/', 'Salesforce-developer.net'))
 		g.breadcrumbs.append(Breadcrumb('/forum', 'Forums'))
 		g.breadcrumbs.append(Breadcrumb('/forum/'+topic.forum.slug, topic.forum.title))
 		g.breadcrumbs.append(Breadcrumb('', topic.title))
 		posts = ForumPost.query.filter_by(topic_id=topic.id).order_by(ForumPost.created_at)
+
+		#for post in posts:
+		#	ForumPostService.update(post)
+
 		meta = Meta(title=topic.title+' | Salesforce-Developer.net',
 				description=topic.title,
 				keywords=topic.forum.title)

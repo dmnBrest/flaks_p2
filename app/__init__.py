@@ -64,7 +64,7 @@ if not app.debug:
 
 
 # ------------ BBCODE PARSER CUSTOM TAGS -----------
-bbcode_parser = bbcode.Parser()
+bbcode_parser = bbcode.Parser(replace_links=False)
 bbcode_parser.add_simple_formatter('h2', '<h2>%(value)s</h2>', swallow_trailing_newline=True)
 bbcode_parser.add_simple_formatter('h3', '<h3>%(value)s</h3>', swallow_trailing_newline=True)
 bbcode_parser.add_simple_formatter('h4', '<h4>%(value)s</h4>', swallow_trailing_newline=True)
@@ -97,6 +97,25 @@ def render_quote(tag_name, value, options, parent, context):
 # Now register our new quote tag, telling it to strip off whitespace, and the newline after the [/quote].
 bbcode_parser.add_formatter('quote', render_quote, strip=True, swallow_trailing_newline=True)
 
+domain_re = re.compile(r'(?im)(?:www\d{0,3}[.]|[a-z0-9.\-]+[.](?:com|net|org|edu|biz|gov|mil|info|io|name|me|tv|us|uk|mobi))')
+
+def render_url(name, value, options, parent, context):
+	if options and 'url' in options:
+		# Option values are not escaped for HTML output.
+		# href = self._replace(options['url'], self.REPLACE_ESCAPE)
+		for find, repl in bbcode_parser.REPLACE_ESCAPE:
+			options['url'] = options['url'].replace(find, repl)
+		href = options['url']
+	else:
+		href = value
+	# Completely ignore javascript: and data: "links".
+	if re.sub(r'[^a-z0-9+]', '', href.lower().split(':', 1)[0]) in ('javascript', 'data', 'vbscript'):
+		return ''
+	# Only add the missing http:// if it looks like it starts with a domain name.
+	if '://' not in href and domain_re.match(href):
+		href = 'http://' + href
+	return '<a href="%s" rel="nofollow">%s</a>' % (href.replace('"', '%22'), value)
+bbcode_parser.add_formatter('url', render_url, replace_links=False, replace_cosmetic=False)
 
 # administrator list
 ADMINS = ['admin@p2.dev']
